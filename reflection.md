@@ -7,17 +7,16 @@
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
-My initial design identifies four distinct classes to separate data management from scheduling logic, ensuring the system follows the Single Responsibility Principle:
+My initial design focuses on three core user actions to ensure the app is functional and user-centric:
+1. **Profile Setup:** Allowing the user to input pet details and define the owner's specific time "budget" for the day.
+2. **Task Management:** Enabling the addition and editing of care tasks with specific durations and priority rankings (1-5).
+3. **Smart Scheduling:** Generating a daily plan that fits within the time budget and provides a natural language explanation for why certain tasks were prioritized.
 
-1.  **User**: Acts as the "Owner" profile, holding the global constraints such as `available_time_mins` (the daily time "budget").
-2.  **Pet**: Stores animal-specific metadata (species, age, requirements) and serves as the link between the owner and the care activities.
-3.  **Task**: A granular data object representing a single unit of work (e.g., "Meds," "Walk"). It holds attributes for `duration_mins`, `priority_level` (1-5), and `category`.
-4.  **CarePlanner**: The "Engine" of the application. It processes the `User` budget and the `Task` list to calculate an optimized schedule and generate natural language reasoning for the owner.
-
-**The system focuses on three core user actions:**
-* **Profile Setup:** Entering pet details and defining the owner's total time "budget" for the day.
-* **Task Management:** Adding and editing care tasks with specific durations and priority rankings.
-* **Smart Scheduling:** Generating a constrained daily plan that fits the time budget and provides an explanation for the task selection.
+To support these actions, I have structured the system into four decoupled classes using Python `dataclasses`:
+* **User**: Stores the owner's profile and the primary time constraint (`available_time_mins`).
+* **Pet**: Acts as a container for animal-specific data and manages the collection of `Task` objects.
+* **Task**: A lightweight object representing a single activity (e.g., "Meds," "Walk"), carrying the data needed for the scheduling algorithm.
+* **CarePlanner**: The "Engine" class. It references the `User` and `Pet` to perform the scheduling logic and store the generated `reasoning` for the user.
 
 
 **b. Design changes**
