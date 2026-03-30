@@ -40,10 +40,19 @@ After an AI architectural review of my initial skeleton, I made the below change
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
 - How did you decide which constraints mattered most?
 
+* **Constraints Considered:** My scheduler evaluates three distinct layers of constraints:
+    * **Hard Temporal Constraint:** The `available_time_mins` provided by the `Owner`, which acts as the total daily budget.
+    * **Categorical Constraint:** The `is_required` flag on the `Task` object, which separates "essential care" from "discretionary activities."
+    * **Soft Priority Constraint:** A 1–5 `priority` scale used to rank optional tasks once essential needs are met.
+* **Decision Matrix:** I decided that **health and safety (Required Tasks)** must always be the top priority. In my logic, a "Priority 3" medication is inherently more important than a "Priority 5" play session. This ensures the app acts as a responsible care steward rather than a simple task-sorter.
+
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
+
+* **The Tradeoff:** I implemented a **"Mandatory-First Greedy"** algorithm. The scheduler allocates time to *all* required tasks first, even if their cumulative duration exceeds the user's available time. Only after these are secured does the system "fill" the remaining minutes with optional tasks sorted by priority.
+* **Reasonability:** This tradeoff is reasonable because pet care requires stewardship over convenience. If a pet needs 15 minutes of medical care but the owner only has 10 minutes, the app should not simply skip the medication to fit the window. By including the task and flagging a **"Time Deficit,"** the app forces the user to acknowledge an unmet essential need, prioritizing the pet's well-being over a "perfect" schedule.
 
 ---
 

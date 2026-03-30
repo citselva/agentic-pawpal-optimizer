@@ -4,6 +4,8 @@ from typing import List
 
 @dataclass
 class Task:
+    """Represents a single care activity with duration, priority, and completion state."""
+
     name: str
     duration: int
     priority: int  # 1-5
@@ -11,11 +13,14 @@ class Task:
     is_completed: bool = False
 
     def toggle_complete(self) -> None:
+        """Toggles the completion status of the task."""
         self.is_completed = not self.is_completed
 
 
 @dataclass
 class ScheduleResult:
+    """Immutable result returned by the Scheduler containing scheduled/skipped tasks and reasoning."""
+
     scheduled_tasks: List[Task]
     skipped_tasks: List[Task]
     total_time_used: int
@@ -24,12 +29,15 @@ class ScheduleResult:
 
 @dataclass
 class Pet:
+    """Models a single pet with its species, age, and associated care tasks."""
+
     name: str
     species: str
     age: int
     tasks: List[Task] = field(default_factory=list)
 
     def get_summary(self) -> str:
+        """Returns a human-readable one-line summary of the pet and its task count."""
         return (
             f"{self.name} ({self.species}, age {self.age}) "
             f"— {len(self.tasks)} task(s)"
@@ -38,25 +46,33 @@ class Pet:
 
 @dataclass
 class Owner:
+    """Represents a pet owner with a time budget and a collection of pets."""
+
     name: str
     available_time_mins: int
     pets: List[Pet] = field(default_factory=list)
 
     def __post_init__(self):
+        """Validates that available_time_mins is non-negative after initialization."""
         if self.available_time_mins < 0:
             raise ValueError(
                 f"available_time_mins cannot be negative, got {self.available_time_mins}"
             )
 
     def get_all_tasks(self) -> List[Task]:
+        """Returns a flat list of all tasks across every pet owned."""
         return [task for pet in self.pets for task in pet.tasks]
 
 
 class Scheduler:
+    """Builds an optimized daily care schedule for all of an owner's pets."""
+
     def __init__(self, owner: Owner) -> None:
+        """Initializes the Scheduler with the given owner."""
         self.owner = owner
 
     def generate_schedule(self) -> ScheduleResult:
+        """Generates a tiered schedule: required tasks first, then optional by priority."""
         available = self.owner.available_time_mins
         all_tasks = self.owner.get_all_tasks()
 
