@@ -1,0 +1,62 @@
+classDiagram
+    direction TB
+
+    class Task {
+        +str name
+        +int duration
+        +int priority
+        +bool is_required
+        +bool is_completed
+        +Optional[str] start_time
+        +str frequency
+        +date due_date
+        +end_time() Optional[str] <<property>>
+        +toggle_complete() None
+    }
+
+    class ScheduleResult {
+        +List~Task~ scheduled_tasks
+        +List~Task~ skipped_tasks
+        +int total_time_used
+        +str reasoning
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +int age
+        +List~Task~ tasks
+        +get_summary() str
+        +complete_task(task: Task) None
+    }
+
+    class Owner {
+        +str name
+        +int available_time_mins
+        +List~Pet~ pets
+        +__post_init__() None
+        +get_all_tasks() List~Task~
+        +filter_tasks(pet_name: str, is_completed: bool) List~Task~
+    }
+
+    class Scheduler {
+        +Owner owner
+        +__init__(owner: Owner) None
+        +sort_tasks(tasks: List~Task~) List~Task~
+        +detect_conflicts(tasks: List~Task~) List~Tuple~Task,Task~~
+        +generate_schedule() ScheduleResult
+    }
+
+    class Frequency {
+        <<enumeration>>
+        one-off
+        daily
+        weekly
+    }
+
+    Task --> Frequency : frequency field
+    Pet "1" *-- "0..*" Task : owns (composition)
+    Owner "1" o-- "0..*" Pet : manages (aggregation)
+    Scheduler --> Owner : reads
+    Scheduler ..> ScheduleResult : creates (dependency)
+    Scheduler ..> Task : sorts / filters
