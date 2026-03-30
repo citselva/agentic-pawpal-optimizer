@@ -21,12 +21,12 @@ classDiagram
         +toggle_complete()
     }
 
-    class CarePlanner {
+    class Scheduler {
         +generate_schedule(tasks: List~Task~) List~Task~
         +get_reasoning() String
     }
 
     User "1" --> "many" Pet : owns
     Pet "1" --> "many" Task : has
-    CarePlanner --> User : references
-    CarePlanner --> Pet : references
+    Scheduler --> User : references
+    Scheduler --> Pet : references
