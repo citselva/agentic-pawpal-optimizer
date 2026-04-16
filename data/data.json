@@ -1,0 +1,33 @@
+{
+  "name": "Bob",
+  "available_time_mins": 300,
+  "pets": [
+    {
+      "name": "Rex",
+      "species": "dog",
+      "age": 4,
+      "tasks": [
+        {
+          "name": "Walk",
+          "duration": 60,
+          "priority": 4,
+          "is_required": true,
+          "is_completed": false,
+          "start_time": "08:00",
+          "frequency": "one-off",
+          "due_date": "2026-04-15"
+        },
+        {
+          "name": "Vet",
+          "duration": 90,
+          "priority": 5,
+          "is_required": true,
+          "is_completed": false,
+          "start_time": "09:00",
+          "frequency": "one-off",
+          "due_date": "2026-04-15"
+        }
+      ]
+    }
+  ]
+}
