@@ -185,7 +185,9 @@ class Owner:
         return owner
 
     def save_to_json(self, filename: str) -> None:
-        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        parent = os.path.dirname(filename)
+        if parent:
+            os.makedirs(parent, exist_ok=True)
         with open(filename, "w") as f:
             json.dump(self.to_dict(), f, indent=2)
 

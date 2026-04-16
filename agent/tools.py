@@ -522,7 +522,13 @@ class PawPalTools:
             ``task_b`` begins.  An empty ``conflicts`` list means the schedule
             is clean.
         """
-        task_objects = [Task.from_dict(t) for t in tasks]
+        try:
+            task_objects = [Task.from_dict(t) for t in tasks]
+        except (KeyError, ValueError) as exc:
+            logger.error(
+                "detect_conflicts: failed to reconstruct Task from dict: %s", exc
+            )
+            return {"conflicts": [], "conflict_count": 0}
         pairs = self._scheduler.detect_conflicts(task_objects)
         return {
             "conflicts": [

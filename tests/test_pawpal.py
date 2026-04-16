@@ -139,14 +139,8 @@ class TestPawPal(unittest.TestCase):
         """TC-STATE-01b: After completing a one-off task it must not re-enter
         get_all_tasks() and must not be rescheduled on the same day.
 
-        PRODUCTION BUG — currently FAILS:
-            get_all_tasks() filters only by ``due_date <= today``, not by
-            ``is_completed``. A completed one-off task whose due_date is today
-            still passes the filter, re-enters generate_schedule(), and gets
-            scheduled again in the same session.
-
-        Fix: add ``and not task.is_completed`` to the get_all_tasks() comprehension.
-        When this test passes, the bug has been resolved — remove this notice.
+        get_all_tasks() filters by ``due_date <= today and not is_completed``,
+        so a completed one-off task is permanently excluded from scheduling.
         """
         task = Task(name="Vet Visit", duration=60, priority=5, frequency="one-off")
         self.pet.tasks.append(task)
