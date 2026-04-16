@@ -1,0 +1,90 @@
+flowchart TD
+    classDef input     fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f,font-weight:bold
+    classDef process   fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef result    fill:#fef9c3,stroke:#ca8a04,color:#713f12
+    classDef output    fill:#f3e8ff,stroke:#9333ea,color:#581c87
+    classDef human     fill:#ffedd5,stroke:#ea580c,color:#7c2d12,font-weight:bold
+    classDef test      fill:#f1f5f9,stroke:#94a3b8,color:#334155
+    classDef decision  fill:#ffffff,stroke:#6b7280,color:#111827
+    classDef store     fill:#dcfce7,stroke:#16a34a,color:#14532d
+
+    %% ── INPUT ───────────────────────────────────────────────────────────────
+    subgraph INPUT["Input — Streamlit Forms  (app.py)"]
+        direction LR
+        OWN(["Owner Settings\nname · available_time_mins"]):::input
+        PET(["Add Pet Form\nname · species · age"]):::input
+        TSK(["Add Task Form\ntitle · duration · priority\nfrequency · is_required · start_time"]):::input
+    end
+
+    %% ── DATA MODEL ───────────────────────────────────────────────────────────
+    subgraph MODEL["Data Model  —  pawpal_system.py"]
+        direction TB
+        OWNER_OBJ["Owner\navailable_time_mins · pets[ ]"]:::process
+        PET_OBJ["Pet\nname · species · age · tasks[ ]"]:::process
+        TASK_OBJ["Task\nname · duration · priority · is_required\nstart_time · frequency · due_date"]:::process
+        PERSIST[("data/data.json\nsave_to_json · load_from_json")]:::store
+    end
+
+    %% ── SCHEDULER ────────────────────────────────────────────────────────────
+    subgraph SCHED_SG["Scheduler  —  pawpal_system.py"]
+        direction TB
+        FILTER["get_all_tasks\ndue_date <= today\nnot is_completed"]:::process
+        SORT["sort_tasks\npriority DESC · duration ASC"]:::process
+        GEN["generate_schedule\nPhase 1 — required tasks unconditional\nPhase 2 — optional tasks fit-first by priority"]:::process
+        DETECT["detect_conflicts\nSweep-line on HH:MM windows\nFlags overlapping pairs"]:::process
+    end
+
+    %% ── RESULT ───────────────────────────────────────────────────────────────
+    RESULT["ScheduleResult\nscheduled_tasks · skipped_tasks\ntotal_time_used · reasoning"]:::result
+
+    %% ── OUTPUT ───────────────────────────────────────────────────────────────
+    subgraph OUT["Output  —  Streamlit UI  (app.py)"]
+        direction LR
+        TABLE["Schedule Table\npriority badges · required lock icon"]:::output
+        BUDGET["Time Budget Bar\nprogress indicator · over-budget alert"]:::output
+        WARN["Conflict Warnings\noverlapping task pairs named"]:::output
+        SKIPPED["Skipped Tasks\nexceeded time budget"]:::output
+    end
+
+    %% ── COMPLETION & RECURRENCE ──────────────────────────────────────────────
+    COMPLETE(["Human: Mark Complete\nbutton click"]):::human
+    RECUR{"task.frequency?"}:::decision
+    RETIRE["Set is_completed = True\nTask retired permanently"]:::process
+    ADVANCE["Advance due_date\ndaily +1 day  ·  weekly +7 days\nTask resurfaces next cycle"]:::process
+
+    %% ── TESTING ──────────────────────────────────────────────────────────────
+    subgraph TEST["Testing  —  tests/test_pawpal.py"]
+        UNIT["20 Unit Test Cases\nTC-SORT · TC-STATE · TC-CONF\nTC-SCHED · TC-FILTER"]:::test
+    end
+
+    %% ── DATA FLOW ────────────────────────────────────────────────────────────
+    OWN --> OWNER_OBJ
+    PET --> PET_OBJ
+    TSK --> TASK_OBJ
+
+    PET_OBJ   --> OWNER_OBJ
+    TASK_OBJ  --> PET_OBJ
+
+    OWNER_OBJ <-->|rehydrate / persist| PERSIST
+
+    OWNER_OBJ --> FILTER
+    FILTER    --> SORT
+    SORT      --> GEN
+    GEN       --> DETECT
+    DETECT    --> RESULT
+
+    RESULT --> TABLE
+    RESULT --> BUDGET
+    RESULT --> WARN
+    RESULT --> SKIPPED
+
+    TABLE --> COMPLETE
+    COMPLETE --> RECUR
+    RECUR -- "one-off" --> RETIRE
+    RECUR -- "daily / weekly" --> ADVANCE
+    RETIRE  --> FILTER
+    ADVANCE --> FILTER
+
+    UNIT -.->|validates| GEN
+    UNIT -.->|validates| DETECT
+    UNIT -.->|validates| FILTER
