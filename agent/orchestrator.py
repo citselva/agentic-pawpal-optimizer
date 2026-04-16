@@ -281,13 +281,17 @@ class PawPalOrchestrator:
 
     @staticmethod
     def _extract_thought(content: list) -> str:
-        """Concatenate all text blocks from a response into a single Thought string."""
+        """Concatenate all text blocks from a response into a single Thought string.
+
+        Returns a non-empty placeholder when the model emits no text blocks so
+        that ``TraceStep.thought`` is always meaningful in the UI.
+        """
         parts = [
             block.text.strip()
             for block in content
             if getattr(block, "type", None) == "text" and block.text.strip()
         ]
-        return "\n".join(parts)
+        return "\n".join(parts) or "(no text reasoning provided)"
 
     @staticmethod
     def _extract_json(text: str) -> Optional[dict[str, Any]]:
@@ -650,9 +654,10 @@ class PawPalOrchestrator:
                 )
 
         # ── Post-loop bookkeeping ─────────────────────────────────────────
-        # If the model resolved conflicts but never called save_state itself,
-        # persist the mutations now so nothing is lost.
-        if resolved and not state_saved:
+        # If state was not saved yet — either the model resolved conflicts without
+        # calling save_state, OR the loop escalated with partial reschedules —
+        # persist the mutations now so nothing is lost on a reload.
+        if not state_saved and (resolved or escalated):
             save_result = self.tools.save_state()
             logger.info("Orchestrator saved state after loop: %s", save_result)
 

@@ -459,9 +459,23 @@ class PawPalTools:
         """
         scheduler = Scheduler(self.owner)
         sr = scheduler.generate_schedule()
+
+        # Build an id → pet_name map before serialisation.  The Scheduler
+        # returns direct object references from owner.pets, so id() is stable.
+        id_to_pet: dict[int, str] = {
+            id(task): pet.name
+            for pet in self.owner.pets
+            for task in pet.tasks
+        }
+
+        def _enrich(task_obj: Task) -> dict:
+            d = task_obj.to_dict()
+            d["pet_name"] = id_to_pet.get(id(task_obj), "")
+            return d
+
         return {
-            "scheduled_tasks": [t.to_dict() for t in sr.scheduled_tasks],
-            "skipped_tasks":   [t.to_dict() for t in sr.skipped_tasks],
+            "scheduled_tasks": [_enrich(t) for t in sr.scheduled_tasks],
+            "skipped_tasks":   [_enrich(t) for t in sr.skipped_tasks],
             "total_time_used": sr.total_time_used,
             "reasoning":       sr.reasoning,
         }
@@ -970,7 +984,19 @@ class PawPalTools:
                 f"Available tools: {sorted(_callable_names)}"
             )
         method = getattr(self, tool_name)
-        return method(**tool_input)
+        try:
+            return method(**tool_input)
+        except TypeError as exc:
+            logger.error(
+                "dispatch: TypeError calling '%s' with input %s: %s",
+                tool_name, tool_input, exc,
+            )
+            return {
+                "success": False,
+                "error": (
+                    f"Tool '{tool_name}' received invalid or missing parameters: {exc}"
+                ),
+            }
 
 
 # ---------------------------------------------------------------------------
@@ -1047,35 +1073,52 @@ def validate_required_tasks(
     """
     today = date.today()
 
-    # Derive required tasks from the owner object — NOT from proposed_schedule.
-    # Using the owner as the source is what makes this check injection-proof.
-    authoritative_required: list[Task] = [
-        task
+    # Build the authoritative (pet_name, task_name) set from the owner object —
+    # NOT from proposed_schedule.  This makes the check injection-proof.
+    authoritative_required: list[tuple[str, Task]] = [
+        (pet.name, task)
         for pet in owner.pets
         for task in pet.tasks
         if task.is_required and task.due_date <= today and not task.is_completed
     ]
 
-    scheduled_names: set[str] = {
-        t.get("name", "")
-        for t in proposed_schedule.get("scheduled_tasks", [])
-    }
+    scheduled_tasks = proposed_schedule.get("scheduled_tasks", [])
+
+    # Prefer tuple matching when pet_name is present in the schedule dicts
+    # (set by PawPalTools.generate_schedule).  Fall back to name-only matching
+    # for legacy schedules that pre-date the pet_name addition so that the
+    # guardrail never silently degrades.
+    has_pet_names = any(t.get("pet_name") for t in scheduled_tasks)
+    if has_pet_names:
+        scheduled_keys: set[tuple[str, str]] = {
+            (t.get("pet_name", ""), t.get("name", ""))
+            for t in scheduled_tasks
+        }
+    else:
+        scheduled_name_set: set[str] = {t.get("name", "") for t in scheduled_tasks}
 
     violations: list[str] = []
     restored: list[dict[str, Any]] = []
 
-    for task in authoritative_required:
-        if task.name not in scheduled_names:
+    for pet_name, task in authoritative_required:
+        if has_pet_names:
+            missing = (pet_name, task.name) not in scheduled_keys
+        else:
+            missing = task.name not in scheduled_name_set
+
+        if missing:
             violations.append(task.name)
-            restored.append(task.to_dict())
+            task_dict = task.to_dict()
+            task_dict["pet_name"] = pet_name  # keep pet_name in restored entry
+            restored.append(task_dict)
             logger.warning(
-                "GUARDRAIL_VIOLATION: required task '%s' was absent from the "
-                "LLM-proposed schedule and has been auto-restored.",
-                task.name,
+                "GUARDRAIL_VIOLATION: required task '%s' on pet '%s' was absent "
+                "from the LLM-proposed schedule and has been auto-restored.",
+                task.name, pet_name,
             )
 
     # Prepend restored tasks so required items always lead the schedule.
-    corrected_scheduled = restored + list(proposed_schedule.get("scheduled_tasks", []))
+    corrected_scheduled = restored + list(scheduled_tasks)
     corrected_schedule = {
         **proposed_schedule,
         "scheduled_tasks": corrected_scheduled,
