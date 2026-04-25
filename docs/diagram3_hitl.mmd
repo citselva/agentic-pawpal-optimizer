@@ -1,0 +1,38 @@
+flowchart TB
+    subgraph HUMAN["Human Checkpoints"]
+        direction LR
+        H1["H1 - Task Entry\nOwner describes care\nin plain language or form"]
+        H2["H2 - Schedule Review\nOwner inspects Gantt\nbefore confirming"]
+        H3["H3 - Mark Complete\nOwner taps task\nto toggle done"]
+        H4["H4 - Audit Review\nOwner reads guardrail\nviolation log (optional)"]
+    end
+
+    subgraph AI["AI Processing (automated)"]
+        A1["NL Parsing\n(Haiku 4.5)"]
+        A2["Two-phase Scheduling"]
+        A3["ReAct Conflict\nResolution (Sonnet 4.6)"]
+        A4["Guardrail Validation"]
+    end
+
+    subgraph TEST["Automated Test Checkpoints"]
+        direction LR
+        T1["T1 - Unit Tests\ntool schemas, data models\n(~30 tests)"]
+        T2["T2 - Integration Tests\nNL parsing accuracy\nReAct resolution rounds"]
+        T3["T3 - Guardrail Tests\nrequired-task restoration\naudit log correctness"]
+        T4["T4 - End-to-End Tests\nfull owner workflow\nfrom input to schedule"]
+    end
+
+    H1 -->|input| A1
+    A1 --> A2
+    A2 -->|conflicts?| A3
+    A3 --> A4
+    A4 -->|corrected schedule| H2
+    H2 -->|satisfied| H3
+    A4 -->|violations logged| H4
+
+    T1 -.->|validates| A1
+    T1 -.->|validates| A2
+    T2 -.->|validates| A1
+    T2 -.->|validates| A3
+    T3 -.->|validates| A4
+    T4 -.->|validates| H1 & H2 & H3
