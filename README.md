@@ -1,6 +1,6 @@
 # PawPal+ — Agentic Pet Care Schedule Optimizer
 
-> **Built on top of:** [PawPal](https://github.com) — a class-designed pet management system with `Task`, `Pet`, and `Owner` data models, a two-phase greedy scheduler, sweep-line conflict detection, and 23 unit tests. The original PawPal let owners define tasks manually, set priorities, and run a single-pass schedule within a daily time budget. It had no AI integration, no conflict *resolution*, no natural-language interface, and no safety guarantees — it could detect a schedule conflict but had no way to fix one. **PawPal+** takes that deterministic foundation and extends it into a fully agentic, multi-turn AI system.
+> **Built on top of:** [PawPal](https://github.com/citselva/ai110-module2show-pawpal-starter) — a class-designed pet management system with `Task`, `Pet`, and `Owner` data models, a two-phase greedy scheduler, sweep-line conflict detection, and 23 unit tests. The original PawPal let owners define tasks manually, set priorities, and run a single-pass schedule within a daily time budget. It had no AI integration, no conflict *resolution*, no natural-language interface, and no safety guarantees — it could detect a schedule conflict but had no way to fix one. **PawPal+** takes that deterministic foundation and extends it into a fully agentic, multi-turn AI system.
 
 ---
 
