@@ -54,7 +54,7 @@ def _load_app_helpers():
     tree = ast.parse(src.read_text(encoding="utf-8"))
 
     # Collect function defs we need
-    targets = {"_priority_badge", "_priority_badge_html", "_section_header"}
+    targets = {"_priority_badge", "_priority_badge_html", "_sidebar_section"}
     func_src_lines = []
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and node.name in targets:
@@ -70,7 +70,7 @@ def _load_app_helpers():
 _APP = _load_app_helpers()
 _priority_badge = _APP["_priority_badge"]
 _priority_badge_html = _APP["_priority_badge_html"]
-_section_header = _APP["_section_header"]
+_sidebar_section = _APP["_sidebar_section"]
 
 
 # ---------------------------------------------------------------------------
@@ -164,7 +164,7 @@ class TestPriorityBadgeHtml:
 
     def test_high_uses_red_background(self):
         html = _priority_badge_html(5)
-        assert "#FEE2E2" in html
+        assert "#FECACA" in html
 
     def test_medium_contains_MED(self):
         html = _priority_badge_html(3)
@@ -172,7 +172,7 @@ class TestPriorityBadgeHtml:
 
     def test_medium_uses_yellow_background(self):
         html = _priority_badge_html(3)
-        assert "#FEF3C7" in html
+        assert "#FDE68A" in html
 
     def test_low_contains_LOW(self):
         html = _priority_badge_html(1)
@@ -180,7 +180,7 @@ class TestPriorityBadgeHtml:
 
     def test_low_uses_green_background(self):
         html = _priority_badge_html(1)
-        assert "#D1FAE5" in html
+        assert "#A7F3D0" in html
 
     def test_returns_span_tag(self):
         for p in (1, 3, 5):
@@ -197,28 +197,29 @@ class TestPriorityBadgeHtml:
         assert "LOW" in html
 
 
-class TestSectionHeader:
-    """TC-UI-03: _section_header() HTML structure."""
+class TestSidebarSection:
+    """TC-UI-03: _sidebar_section() HTML structure."""
 
     def test_contains_icon(self):
-        html = _section_header("🐾", "Tasks")
+        html = _sidebar_section("🐾", "Tasks")
         assert "🐾" in html
 
     def test_contains_title(self):
-        html = _section_header("🐾", "My Tasks")
+        html = _sidebar_section("🐾", "My Tasks")
         assert "My Tasks" in html
 
     def test_no_subtitle_when_omitted(self):
-        html = _section_header("🐾", "Tasks")
-        # subtitle div should NOT appear
-        assert "margin:0.2rem" not in html
+        html = _sidebar_section("🐾", "Tasks")
+        # subtitle div has margin-top:2px — absent when no subtitle supplied
+        assert "margin-top:2px" not in html
 
     def test_subtitle_appears_when_provided(self):
-        html = _section_header("🐾", "Tasks", "Manage your schedule")
+        html = _sidebar_section("🐾", "Tasks", "Manage your schedule")
         assert "Manage your schedule" in html
+        assert "margin-top:2px" in html
 
     def test_returns_string(self):
-        assert isinstance(_section_header("🐾", "X"), str)
+        assert isinstance(_sidebar_section("🐾", "X"), str)
 
 
 # ---------------------------------------------------------------------------
@@ -997,3 +998,99 @@ class TestCorrectionResult:
         cr = self._clean()
         # Should parse without raising
         datetime.fromisoformat(cr.timestamp.replace("Z", "+00:00"))
+
+
+# ---------------------------------------------------------------------------
+# TC-STVAL: Start-time HH:MM format validation (FIX #5)
+# ---------------------------------------------------------------------------
+
+
+class TestStartTimeValidation:
+    """TC-STVAL-01 through TC-STVAL-07: regex used by the Add Task form."""
+
+    _RE = r"^\d{2}:\d{2}$"
+
+    def test_valid_hhmm_passes(self):
+        import re
+        assert re.match(self._RE, "09:00") is not None
+
+    def test_midnight_passes(self):
+        import re
+        assert re.match(self._RE, "00:00") is not None
+
+    def test_end_of_day_passes(self):
+        import re
+        assert re.match(self._RE, "23:59") is not None
+
+    def test_single_digit_hour_fails(self):
+        import re
+        assert re.match(self._RE, "9:00") is None
+
+    def test_am_pm_notation_fails(self):
+        import re
+        assert re.match(self._RE, "9am") is None
+
+    def test_seconds_included_fails(self):
+        import re
+        assert re.match(self._RE, "09:00:00") is None
+
+    def test_empty_string_maps_to_none(self):
+        st_val = "".strip() or None
+        assert st_val is None
+
+    def test_whitespace_only_maps_to_none(self):
+        st_val = "   ".strip() or None
+        assert st_val is None
+
+    def test_valid_value_preserved(self):
+        st_val = "14:30".strip() or None
+        assert st_val == "14:30"
+
+
+# ---------------------------------------------------------------------------
+# TC-DUPCOMP: Duplicate task name completion via index (FIX #4)
+# ---------------------------------------------------------------------------
+
+
+class TestDuplicateTaskCompletion:
+    """TC-DUPCOMP-01 through TC-DUPCOMP-04: index-based completion is unambiguous."""
+
+    def _pet_with_duplicate_walks(self, today):
+        pet = Pet(name="Rex", species="dog", age=3)
+        pet.tasks = [
+            Task(name="Walk", duration=30, priority=3, due_date=today, frequency="one-off"),
+            Task(name="Walk", duration=45, priority=5, is_required=True, due_date=today, frequency="daily"),
+            Task(name="Feed", duration=10, priority=5, due_date=today, frequency="daily"),
+        ]
+        return pet
+
+    def test_complete_by_index_0_retires_first_task(self, today):
+        pet = self._pet_with_duplicate_walks(today)
+        task = pet.tasks[0]
+        pet.complete_task(task)
+        assert pet.tasks[0].is_completed is True
+        assert pet.tasks[1].is_completed is False
+
+    def test_complete_by_index_1_advances_second_task(self, today):
+        pet = self._pet_with_duplicate_walks(today)
+        task = pet.tasks[1]
+        pet.complete_task(task)
+        # daily — not retired, due_date advanced
+        assert pet.tasks[1].is_completed is False
+        assert pet.tasks[1].due_date == today + timedelta(days=1)
+        # first Walk untouched
+        assert pet.tasks[0].is_completed is False
+
+    def test_index_lookup_via_identity(self, today):
+        """id-based lookup (t is task) finds the correct task object."""
+        pet = self._pet_with_duplicate_walks(today)
+        target = pet.tasks[1]  # second Walk
+        found_idx = next(
+            (idx for idx, t in enumerate(pet.tasks) if t is target), None
+        )
+        assert found_idx == 1
+
+    def test_third_distinct_task_not_affected(self, today):
+        pet = self._pet_with_duplicate_walks(today)
+        pet.complete_task(pet.tasks[0])
+        assert pet.tasks[2].is_completed is False
