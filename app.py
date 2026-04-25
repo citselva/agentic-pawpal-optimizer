@@ -102,7 +102,7 @@ code, pre, .stCode { font-family: 'DM Mono', monospace !important; }
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] label,
 [data-testid="stSidebar"] .stMarkdown p,
-[data-testid="stSidebar"] .stCaption { color: #64748B !important; }
+[data-testid="stSidebar"] .stCaption { color: #94A3B8 !important; }
 [data-testid="stSidebar"] h1,
 [data-testid="stSidebar"] h2,
 [data-testid="stSidebar"] h3 { color: #F1F5F9 !important; }
@@ -119,28 +119,53 @@ code, pre, .stCode { font-family: 'DM Mono', monospace !important; }
     background: rgba(255,107,53,0.22) !important;
 }
 
-[data-testid="stSidebar"] .stTextInput > div > div > input,
-[data-testid="stSidebar"] .stNumberInput > div > div > input {
-    background: rgba(255,255,255,0.06) !important;
-    border-color: rgba(255,255,255,0.10) !important;
-    color: #E2E8F0 !important;
+/* BaseWeb container bg + border */
+[data-testid="stSidebar"] [data-baseweb="input"] {
+    background: rgba(255,255,255,0.08) !important;
+    border-color: rgba(255,255,255,0.12) !important;
     border-radius: 8px !important;
 }
-[data-testid="stSidebar"] .stTextInput > div > div > input::placeholder,
-[data-testid="stSidebar"] .stNumberInput > div > div > input::placeholder {
-    color: #475569 !important;
+/* Inner div that BaseWeb renders inside the container */
+[data-testid="stSidebar"] [data-baseweb="input"] > div {
+    background: transparent !important;
 }
-[data-testid="stSidebar"] .stTextInput > div > div > input:focus,
-[data-testid="stSidebar"] .stNumberInput > div > div > input:focus {
+/* The actual <input> element — cover all selector paths */
+[data-testid="stSidebar"] [data-baseweb="input"] input,
+[data-testid="stSidebar"] .stTextInput input,
+[data-testid="stSidebar"] .stNumberInput input,
+[data-testid="stSidebar"] input[type="text"],
+[data-testid="stSidebar"] input[type="number"] {
+    background: transparent !important;
+    color: #E2E8F0 !important;
+    -webkit-text-fill-color: #E2E8F0 !important;
+    border-radius: 8px !important;
+}
+[data-testid="stSidebar"] [data-baseweb="input"] input::placeholder,
+[data-testid="stSidebar"] input::placeholder {
+    color: #64748B !important;
+    -webkit-text-fill-color: #64748B !important;
+    opacity: 1 !important;
+}
+[data-testid="stSidebar"] [data-baseweb="input"]:focus-within {
     border-color: var(--coral) !important;
     box-shadow: 0 0 0 3px rgba(255,107,53,0.12) !important;
-    background: rgba(255,255,255,0.09) !important;
+    background: rgba(255,255,255,0.12) !important;
 }
-
-/* FIX #8: Sidebar select — menu popover dark */
-[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div {
+[data-testid="stSidebar"] .stNumberInput button {
+    color: #94A3B8 !important;
     background: rgba(255,255,255,0.06) !important;
     border-color: rgba(255,255,255,0.10) !important;
+}
+[data-testid="stSidebar"] .stNumberInput button:hover {
+    color: #E2E8F0 !important;
+    background: rgba(255,255,255,0.12) !important;
+}
+
+/* FIX #8: Sidebar select — trigger dark, menu popover dark */
+[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"],
+[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div {
+    background: rgba(255,255,255,0.08) !important;
+    border-color: rgba(255,255,255,0.12) !important;
     color: #E2E8F0 !important;
     border-radius: 8px !important;
 }
@@ -235,21 +260,86 @@ code, pre, .stCode { font-family: 'DM Mono', monospace !important; }
     border-color: rgba(255,255,255,0.22) !important;
 }
 
-/* ── Text inputs (main area) ──────────────────────────────────────────── */
-.stTextInput > div > div > input,
-.stNumberInput > div > div > input {
+/* ── Text inputs — global (sidebar rules above override for dark pane) ── */
+/* BaseWeb container — scoped to .main so sidebar dark overrides are not clobbered */
+.main [data-baseweb="input"] {
+    background: var(--white) !important;
+    border-color: var(--border) !important;
+    border-radius: 8px !important;
+}
+/* Actual input element — all selector paths + webkit fill override */
+.stTextInput input,
+.stNumberInput input {
     border-radius: 8px !important;
     border: 1.5px solid var(--border) !important;
     background: var(--white) !important;
     color: var(--text) !important;
+    -webkit-text-fill-color: var(--text) !important;
     transition: border-color 0.18s, box-shadow 0.18s !important;
 }
-.stTextInput > div > div > input:focus,
-.stNumberInput > div > div > input:focus {
+.stTextInput input:focus,
+.stNumberInput input:focus {
     border-color: var(--coral) !important;
     box-shadow: 0 0 0 3px rgba(255,107,53,0.12) !important;
     outline: none !important;
 }
+.stTextInput input::placeholder,
+.stNumberInput input::placeholder {
+    color: var(--muted) !important;
+    -webkit-text-fill-color: var(--muted) !important;
+    opacity: 1 !important;
+}
+
+/* ── Main area — global widget labels ────────────────────────────────── */
+.main label { color: var(--text) !important; }
+
+/* ── Main area — selectbox + multiselect triggers ────────────────────── */
+.main .stSelectbox [data-baseweb="select"] > div,
+.main .stMultiSelect [data-baseweb="select"] > div {
+    background: var(--white) !important;
+    border-color: var(--border) !important;
+    color: var(--text) !important;
+    border-radius: 8px !important;
+}
+
+/* ── Date input ──────────────────────────────────────────────────────── */
+[data-testid="stDateInput"] > div > div {
+    background: var(--white) !important;
+    border-color: var(--border) !important;
+    border-radius: 8px !important;
+}
+[data-testid="stDateInput"] input {
+    color: var(--text) !important;
+    background: transparent !important;
+}
+[data-testid="stDateInput"] input::placeholder { color: var(--muted) !important; }
+[data-testid="stDateInput"] input:focus {
+    border-color: var(--coral) !important;
+    box-shadow: 0 0 0 3px rgba(255,107,53,0.12) !important;
+}
+
+/* ── Sidebar — date input override ───────────────────────────────────── */
+[data-testid="stSidebar"] [data-testid="stDateInput"] > div > div,
+[data-testid="stSidebar"] [data-testid="stDateInput"] > div {
+    background: rgba(255,255,255,0.08) !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    border-radius: 8px !important;
+}
+[data-testid="stSidebar"] [data-testid="stDateInput"] input {
+    color: #E2E8F0 !important;
+    background: transparent !important;
+}
+
+/* ── Main area — checkbox ─────────────────────────────────────────────── */
+.main .stCheckbox label p,
+.main .stCheckbox label span { color: var(--text) !important; }
+
+/* ── Main area — number-input spinner buttons ─────────────────────────── */
+.main .stNumberInput button {
+    color: var(--muted) !important;
+    border-color: var(--border) !important;
+}
+.main .stNumberInput button:hover { color: var(--text) !important; }
 
 /* ── Progress bar ─────────────────────────────────────────────────────── */
 [data-testid="stProgressBarValue"] {
@@ -303,6 +393,10 @@ code, pre, .stCode { font-family: 'DM Mono', monospace !important; }
     border-radius: 10px !important;
     border-left-width: 4px !important;
 }
+[data-testid="stAlert"] p,
+[data-testid="stAlert"] [data-testid="stMarkdownContainer"] p {
+    color: var(--text) !important;
+}
 
 /* ── Chat messages ────────────────────────────────────────────────────── */
 [data-testid="stChatMessage"] {
@@ -344,8 +438,62 @@ code, pre, .stCode { font-family: 'DM Mono', monospace !important; }
     border-radius: 10px !important;
     border: 1px solid var(--border) !important;
 }
+[data-testid="stStatus"] p,
+[data-testid="stStatus"] [data-testid="stMarkdownContainer"] p {
+    color: var(--text) !important;
+}
 
 hr { border-color: var(--border) !important; margin: 1.25rem 0 !important; }
+
+/* ── Floating chat input — force white theme ──────────────────────────── */
+/* Outer bar */
+.stChatFloatingInputContainer,
+[data-testid="stBottom"],
+[data-testid="stBottom"] > div {
+    background: var(--slate) !important;
+    border-top: 1px solid var(--border) !important;
+    padding: 0.5rem 1rem 0.75rem !important;
+}
+/* White pill container — cover all Streamlit versions */
+.stChatFloatingInputContainer > div,
+[data-testid="stChatInput"],
+[data-testid="stChatInput"] > div,
+[data-testid="stChatInputContainer"],
+[data-testid="stChatInputContainer"] > div {
+    background: var(--white) !important;
+    border-radius: 12px !important;
+    border: 1.5px solid var(--border) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06) !important;
+}
+/* Textarea — explicit white bg so typed text is always dark on white */
+.stChatFloatingInputContainer textarea,
+[data-testid="stChatInput"] textarea,
+[data-testid="stChatInputContainer"] textarea {
+    color: var(--text) !important;
+    background: var(--white) !important;
+    caret-color: var(--coral) !important;
+}
+/* Placeholder */
+.stChatFloatingInputContainer textarea::placeholder,
+[data-testid="stChatInput"] textarea::placeholder,
+[data-testid="stChatInputContainer"] textarea::placeholder {
+    color: var(--muted) !important;
+    opacity: 1 !important;
+}
+/* Send button */
+.stChatFloatingInputContainer button,
+[data-testid="stChatInput"] button,
+[data-testid="stChatInputContainer"] button {
+    background: var(--coral) !important;
+    border-radius: 8px !important;
+    color: #fff !important;
+    border: none !important;
+}
+.stChatFloatingInputContainer button:hover,
+[data-testid="stChatInput"] button:hover,
+[data-testid="stChatInputContainer"] button:hover {
+    background: var(--coral-dark) !important;
+}
 </style>
 """
 st.markdown(_CSS, unsafe_allow_html=True)
@@ -1067,7 +1215,8 @@ with agent_col:
         st.markdown('<div class="btn-ghost">', unsafe_allow_html=True)
         if st.button("🗑 Clear", key="clear_chat", help="Clear chat history", use_container_width=True):
             st.session_state.chat_history = []
-            st.rerun()
+            # No explicit st.rerun() — the natural button-click rerun is sufficient.
+            # Calling st.rerun() here causes a double-rerun that can disable st.chat_input.
         st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown(
