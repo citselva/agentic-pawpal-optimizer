@@ -130,7 +130,7 @@ The following walkthrough demonstrates PawPal+ running end-to-end, from the init
 ### 🎬 Video Demo
 
 <p align="center">
-  <img src="assets/demo_walkthrough.gif" alt="PawPal+ Demo Walkthrough" width="800"/>
+  <img src="assets/demo_playback.webp" alt="PawPal+ Demo Walkthrough" width="800"/>
 </p>
 
 > **What you're seeing:** (1) The initial dashboard with pets, metrics, and Gantt chart → (2) A natural language chat interaction adding a task via Claude Haiku 4.5 → (3) The ReAct Agent optimizing the schedule and resolving conflicts. The demo loops automatically.
@@ -624,7 +624,7 @@ agentic-pawpal-optimizer/
 │   ├── guardrail.py                # Safety validation + JSONL audit logging
 │   └── prompts.py                  # System prompt templates + NL parse templates
 ├── assets/
-│   ├── demo_walkthrough.gif        # Animated demo walkthrough (GIF)
+│   ├── demo_playback.webp          # Recorded playback video (WebP)
 │   ├── demo_step1_dashboard.png    # Walkthrough step 1
 │   ├── demo_step2_chat.png         # Walkthrough step 2
 │   ├── demo_step3_optimized.png    # Walkthrough step 3

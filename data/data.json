@@ -12,8 +12,8 @@
           "duration": 60,
           "priority": 4,
           "is_required": true,
-          "is_completed": false,
-          "start_time": "17:20",
+          "is_completed": true,
+          "start_time": "17:30",
           "frequency": "one-off",
           "due_date": "2026-04-25"
         },
@@ -22,7 +22,7 @@
           "duration": 90,
           "priority": 5,
           "is_required": true,
-          "is_completed": false,
+          "is_completed": true,
           "start_time": "09:00",
           "frequency": "one-off",
           "due_date": "2026-04-25"
@@ -42,7 +42,7 @@
           "duration": 30,
           "priority": 3,
           "is_required": false,
-          "is_completed": false,
+          "is_completed": true,
           "start_time": "17:00",
           "frequency": "one-off",
           "due_date": "2026-04-25"
@@ -56,6 +56,46 @@
           "start_time": "17:00",
           "frequency": "one-off",
           "due_date": "2026-04-25"
+        },
+        {
+          "name": "Walk",
+          "duration": 30,
+          "priority": 3,
+          "is_required": false,
+          "is_completed": false,
+          "start_time": "18:00",
+          "frequency": "one-off",
+          "due_date": "2026-04-26"
+        },
+        {
+          "name": "Feeding",
+          "duration": 30,
+          "priority": 3,
+          "is_required": false,
+          "is_completed": false,
+          "start_time": "21:00",
+          "frequency": "one-off",
+          "due_date": "2026-04-26"
+        },
+        {
+          "name": "Feeding",
+          "duration": 30,
+          "priority": 3,
+          "is_required": false,
+          "is_completed": false,
+          "start_time": "20:00",
+          "frequency": "one-off",
+          "due_date": "2026-04-26"
+        },
+        {
+          "name": "Feeding",
+          "duration": 30,
+          "priority": 3,
+          "is_required": false,
+          "is_completed": false,
+          "start_time": "20:00",
+          "frequency": "one-off",
+          "due_date": "2026-04-26"
         }
       ]
     },
