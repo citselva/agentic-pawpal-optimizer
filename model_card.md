@@ -14,6 +14,7 @@
 | **Intended use** | Helping individual pet owners organize daily care schedules |
 | **Not intended for** | Multi-tenant deployment, medical/veterinary decision-making, any safety-critical care without human review |
 | **Data handled** | Owner names, pet names/species/ages, task names, times, priorities — no PII beyond what the user enters |
+| **Visualization** | Dynamic HTML Gantt Chart with conflict indicators |
 | **Last updated** | April 2026 |
 
 ---
@@ -117,11 +118,9 @@ No amount of reasoning about CSS specificity would have led me to this answer. I
 
 ---
 
-## 4. Collaboration with AI During This Project
+Building PawPal+ was a continuous collaboration with AI coding assistants (including Claude Code and Google's Antigravity). The AI drafted code, caught bugs, suggested architectural patterns, and reviewed CSS. The human role was to evaluate those suggestions critically — acting as the primary architect and lead debugger.
 
-Building PawPal+ was a continuous collaboration with Claude Code (Anthropic's AI coding assistant). The AI drafted code, caught bugs, suggested architectural patterns, and reviewed CSS. My job was to evaluate those suggestions critically — accepting what was sound, rejecting what wasn't, and occasionally explaining why.
-
-Here is an honest account of one moment where the collaboration worked exceptionally well, and one where it went wrong.
+Here is an account of two specific moments from this collaboration — one where the AI's intuition changed the architecture for the better, and one where its logic failed at the browser level.
 
 ---
 
