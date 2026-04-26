@@ -13,7 +13,7 @@
           "priority": 4,
           "is_required": true,
           "is_completed": false,
-          "start_time": "08:00",
+          "start_time": "17:20",
           "frequency": "one-off",
           "due_date": "2026-04-25"
         },
@@ -24,6 +24,53 @@
           "is_required": true,
           "is_completed": false,
           "start_time": "09:00",
+          "frequency": "one-off",
+          "due_date": "2026-04-25"
+        },
+        {
+          "name": "Walk",
+          "duration": 20,
+          "priority": 3,
+          "is_required": false,
+          "is_completed": false,
+          "start_time": "17:00",
+          "frequency": "one-off",
+          "due_date": "2026-04-25"
+        },
+        {
+          "name": "Walk",
+          "duration": 30,
+          "priority": 3,
+          "is_required": false,
+          "is_completed": false,
+          "start_time": "17:00",
+          "frequency": "one-off",
+          "due_date": "2026-04-25"
+        },
+        {
+          "name": "Walk",
+          "duration": 30,
+          "priority": 3,
+          "is_required": false,
+          "is_completed": false,
+          "start_time": "17:00",
+          "frequency": "one-off",
+          "due_date": "2026-04-25"
+        }
+      ]
+    },
+    {
+      "name": "Buddy",
+      "species": "dog",
+      "age": 13,
+      "tasks": [
+        {
+          "name": "Walk",
+          "duration": 30,
+          "priority": 3,
+          "is_required": false,
+          "is_completed": false,
+          "start_time": "14:00",
           "frequency": "one-off",
           "due_date": "2026-04-25"
         }
