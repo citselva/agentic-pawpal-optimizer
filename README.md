@@ -18,6 +18,7 @@
 6. [Design Decisions](#6-design-decisions)
 7. [Testing Summary](#7-testing-summary)
 8. [Reflection](#8-reflection)
+9. [Project Resources](#project-resources)
 
 ---
 
@@ -646,3 +647,13 @@ agentic-pawpal-optimizer/
 ## License
 
 MIT — free to use, extend, and build on.
+---
+
+## 9. Project Resources
+
+For a deep dive into the system design, architecture, and engineering decisions, please refer to the following supplemental documents:
+
+- **📽️ Full Project Presentation:** [PawPal_Plus_Applied_AI_System.pptx](assets/PawPal_Plus_Applied_AI_System.pptx) — Comprehensive overview of goals, architecture, and results.
+- **🗺️ System Architecture Diagram:** [system_architecture.png](assets/system_architecture.png) — High-fidelity visualization of the agentic and deterministic layers.
+- **📄 Model Card:** [model_card.md](model_card.md) — Detailed accounting of model selection, limitations, biases, and safety assessment.
+- **📝 Technical Specification:** [REQUIREMENTS_EXTENSION.md](REQUIREMENTS_EXTENSION.md) — The original engineering requirements and tool schemas for the agentic extension.
