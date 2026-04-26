@@ -119,7 +119,7 @@ Opens at `http://localhost:8501`. A sample `data/data.json` is included with one
 pytest tests/ -v
 ```
 
-Expected: **~190 tests** across three files, all passing, in under 5 seconds (no API calls — all LLM interactions are mocked).
+Expected: **219 tests** across three files, all passing, in under 5 seconds (no API calls — all LLM interactions are mocked).
 
 ---
 
@@ -559,6 +559,55 @@ Building PawPal+ was a continuous dialogue with an AI coding assistant.
 > For a more exhaustive technical accounting of the system's risks, mitigations, and performance metrics, see the [Model Card](model_card.md).
 
 ---
+
+---
+
+## Optional Features Implemented
+
+Three optional extension features have been implemented in this project.
+
+### Optional Feature A — Agentic Workflow Enhancement
+
+**Status: Fully implemented.**
+
+PawPal+ implements three distinct agentic workflow patterns in `agent/orchestrator.py`:
+
+| Pattern | Model | Description |
+|---|---|---|
+| **Single-shot NL parsing** | Claude Haiku 4.5 | One structured tool-use call extracts a fully-formed `Task` from free text, or returns a typed `clarification_request` JSON — no multi-turn guessing. |
+| **Multi-turn ReAct loop** | Claude Sonnet 4.6 | Bounded Thought → Action → Observation loop (≤ 5 steps) iteratively reschedules conflicting tasks using `reschedule_task`. Every step is recorded in a `TraceStep` dataclass and surfaced in the UI. |
+| **Synchronous post-loop guardrail** | No LLM | After the ReAct loop closes, `run_guardrail()` validates the proposed schedule against the live Python `Owner` object — injection-proof and non-bypassable. |
+
+Evidence: `agent/orchestrator.py` (classes `PawPalOrchestrator`, `TraceStep`, `RunMetrics`), `agent/tools.py` (`TOOL_SCHEMAS` + `PawPalTools`), Section 2 of `REQUIREMENTS_EXTENSION.md`, Sections 5–6 of this document.
+
+---
+
+### Optional Feature B — Model Specialization
+
+**Status: Fully implemented via task-specific model selection and prompt specialization.**
+
+PawPal+ applies two distinct forms of specialization rather than fine-tuning on new data:
+
+1. **Task-specific model selection:** Claude Haiku 4.5 is selected for the NL parsing path (structured extraction, low latency, ~400–600 ms) and Claude Sonnet 4.6 for the multi-step ReAct conflict resolution path (deeper reasoning, sequential tool use). See Design Decision 1.
+2. **Domain-specialized system prompt:** The `SYSTEM_PROMPT` in `agent/prompts.py` encodes six hard constraints (RULE 1–6), a five-step conflict resolution procedure, and a full domain model (task fields, two-phase scheduling algorithm, conflict definition) specific to the pet-care scheduling domain. This prompt is cached via `cache_control: ephemeral` across all calls in a session (Design Decision 4).
+
+Evidence: `agent/prompts.py` (`SYSTEM_PROMPT`, `_BOUNDARY`), `agent/orchestrator.py` (`_build_system_messages`, `parse_nl_task`, `resolve_schedule_conflicts`), `REQUIREMENTS_EXTENSION.md` Section 3.3.
+
+---
+
+### Optional Feature C — Test Harness
+
+**Status: Fully implemented.**
+
+219 automated tests across three files cover every layer of the system, running in under 3 seconds with no live API calls (all LLM interactions mocked via `unittest.mock.MagicMock`):
+
+| File | Tests | Coverage |
+|---|---|---|
+| `tests/test_agent.py` | 111 | Tools 1–9, dispatch routing, guardrail algorithm, orchestrator helpers, NL parsing, ReAct loop |
+| `tests/test_e2e.py` | 85 | Full workflows, persistence round-trip, token metrics, chat flow, regression cases |
+| `tests/test_pawpal.py` | 23 | Core scheduler: sorting, conflict detection, recurrence, budget phases |
+
+Run: `pytest tests/ -v` — all 219 pass. See Section 7 for representative test cases and what they caught.
 
 ---
 

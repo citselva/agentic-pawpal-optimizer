@@ -1,7 +1,7 @@
 # REQUIREMENTS EXTENSION — Agentic PawPal Optimizer
 
-**Status:** Draft  
-**Date:** 2026-04-15  
+**Status:** Final  
+**Date:** 2026-04-26  
 **Author:** Selvakumar Thirumalainambi  
 **Base branch:** `main` (M2 deterministic scheduler)
 
@@ -287,7 +287,7 @@ flowchart TD
 
     %% ── TESTING & OBSERVABILITY ──────────────────────────────────────────────
     subgraph OBS["Testing & Observability"]
-        UNIT["Unit Tests  —  test_pawpal.py\n20 cases: sort · recurrence · conflict\ndetection · scheduler phases · edge cases"]:::test
+        UNIT["Unit Tests  —  219 total (test_pawpal.py · test_agent.py · test_e2e.py)\n23 · 111 · 85 cases: sort · recurrence · conflict\ndetection · scheduler phases · edge cases · tools · ReAct loop"]:::test
         GLOG["GUARDRAIL_VIOLATION Log\nTimestamped audit trail per session"]:::test
         ATRACE["agent_trace[]\nStep-by-step ReAct log\nstored in st.session_state · rendered in UI"]:::test
     end
@@ -347,3 +347,67 @@ flowchart TD
 | `NFR-04` | All LLM calls MUST use prompt caching on static content (system prompt, tool schemas) to minimize latency and API cost. |
 | `NFR-05` | The existing deterministic path (`Scheduler.generate_schedule()`) MUST remain callable without the agent layer, so the Streamlit UI can fall back gracefully when no API key is configured. |
 | `NFR-06` | Agent reasoning traces MUST be stored in `st.session_state` so they survive Streamlit reruns within the same browser session. |
+
+---
+
+## 7. Optional Features — Implementation Status
+
+### OF-A — Agentic Workflow Enhancement
+
+**Status: Fully implemented.**
+
+| Requirement | Implementation | Location |
+|---|---|---|
+| Multi-turn agent loop with tool use | `PawPalOrchestrator.resolve_schedule_conflicts()` — bounded ReAct loop (≤ 5 steps) using Claude Sonnet 4.6 | `agent/orchestrator.py` |
+| Structured tool-use routing | `PawPalTools.dispatch()` dispatches 9 LLM-callable tools; Tool 10 (guardrail) is intentionally excluded from the schema | `agent/tools.py` |
+| NL-to-structured-task parsing | `PawPalOrchestrator.parse_nl_task()` — single structured call to Claude Haiku 4.5 | `agent/orchestrator.py` |
+| Human-in-the-loop escalation | Clarification flow on missing fields (FR-NL-03); conflict escalation when loop exhausts steps (FR-RL-04) | `agent/orchestrator.py`, `app.py` |
+| Agent reasoning trace in UI | `TraceStep` dataclass logged per iteration; rendered in Streamlit expander | `agent/orchestrator.py`, `app.py` |
+| Token / latency metrics | `RunMetrics` aggregates calls, tokens, cache efficiency; displayed in Performance Report expander | `agent/orchestrator.py`, `app.py` |
+
+Evidence: Sections 2–4 of this document; `README.md` Sections 5–6.
+
+---
+
+### OF-B — Model Specialization
+
+**Status: Fully implemented via task-specific model selection and domain-specialized prompt engineering.**
+
+This feature is implemented without supervised fine-tuning (no custom training data or LoRA adapters). Specialization is achieved through two mechanisms:
+
+**1. Task-specific model selection**
+
+| Task | Model | Rationale |
+|---|---|---|
+| NL task extraction | `claude-haiku-4-5-20251001` | Single structured call; speed and cost matter more than reasoning depth |
+| Multi-step conflict resolution | `claude-sonnet-4-6` | Requires multi-turn reasoning across a schedule graph with competing constraints |
+
+**2. Domain-specialized system prompt**
+
+`SYSTEM_PROMPT` in `agent/prompts.py` encodes:
+- Six hard constraints (RULE 1–6) specific to the scheduling domain (never drop required tasks, never alter `duration`/`priority`/`is_required`)
+- A five-step conflict resolution procedure with explicit decision criteria
+- Full domain model (task fields, two-phase scheduling algorithm, conflict definition)
+- Prompt caching via `cache_control: ephemeral` on the static head (~97% of tokens) to reduce per-call token cost — tracked live in the UI
+
+Evidence: `agent/prompts.py` (`SYSTEM_PROMPT`, `_BOUNDARY`); `agent/orchestrator.py` (`_build_system_messages`); `README.md` Design Decisions 1 and 4; Section 3.3 of this document.
+
+---
+
+### OF-C — Test Harness
+
+**Status: Fully implemented.**
+
+| File | Tests | Coverage |
+|---|---|---|
+| `tests/test_agent.py` | 111 | Tools 1–9, dispatch routing, guardrail algorithm, orchestrator helpers, NL parsing, ReAct loop |
+| `tests/test_e2e.py` | 85 | Full workflows, persistence round-trip, token metrics, chat flow, regression cases |
+| `tests/test_pawpal.py` | 23 | Core scheduler: sorting, conflict detection, recurrence, budget phases |
+| **Total** | **219** | All layers; 0 failures; completed in 2.31 s; no live API calls |
+
+Key design properties of the test harness:
+- All LLM interactions mocked via `unittest.mock.MagicMock` — tests are deterministic, fast, and run without an API key
+- Regression tests cover documented edge cases: midnight rollover (`test_midnight_rollover_known_failure`), same-name tasks across pets (`test_same_name_different_pets`), malformed tool inputs (`TestDetectConflictsRobustness`)
+- `test_same_name_different_pets` caught a live safety bug (name-only guardrail matching silently bypassed for identically-named tasks on different pets) before it reached a user
+
+Evidence: `tests/` directory; `README.md` Section 7.
