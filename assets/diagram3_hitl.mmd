@@ -1,38 +1,39 @@
 flowchart TB
-    subgraph HUMAN["Human Checkpoints"]
+    %% ── CLASS DEFINITIONS ───────────────────────────────────────────────────
+    classDef human     fill:#FB923C,stroke:#EA580C,color:#FFFFFF,font-weight:bold
+    classDef ai        fill:#FF6B35,stroke:#E8531E,color:#FFFFFF
+    classDef test      fill:#F1F5F9,stroke:#94A3B8,color:#334155
+
+    subgraph HUMAN["👤 Human Checkpoints"]
         direction LR
-        H1["H1 - Task Entry\nOwner describes care\nin plain language or form"]
-        H2["H2 - Schedule Review\nOwner inspects Gantt\nbefore confirming"]
-        H3["H3 - Mark Complete\nOwner taps task\nto toggle done"]
-        H4["H4 - Audit Review\nOwner reads guardrail\nviolation log (optional)"]
+        H1["📥 H1: Task Entry"]
+        H2["📊 H2: Schedule Review"]
+        H3["✅ H3: Task Completion"]
     end
 
-    subgraph AI["AI Processing (automated)"]
-        A1["NL Parsing\n(Haiku 4.5)"]
-        A2["Two-phase Scheduling"]
-        A3["ReAct Conflict\nResolution (Sonnet 4.6)"]
-        A4["Guardrail Validation"]
+    subgraph AI["🤖 AI Processing"]
+        A1["🧠 NL Parsing"]
+        A2["⚙️ Scheduling"]
+        A3["🔄 ReAct Loop"]
+        A4["⚖️ Evaluation"]
     end
 
-    subgraph TEST["Automated Test Checkpoints"]
+    subgraph TEST["🧪 Test Checkpoints"]
         direction LR
-        T1["T1 - Unit Tests\ntool schemas, data models\n(~30 tests)"]
-        T2["T2 - Integration Tests\nNL parsing accuracy\nReAct resolution rounds"]
-        T3["T3 - Guardrail Tests\nrequired-task restoration\naudit log correctness"]
-        T4["T4 - End-to-End Tests\nfull owner workflow\nfrom input to schedule"]
+        T1["T1: Unit Tests"]
+        T2["T2: Integration"]
+        T3["T3: Evaluator Tests"]
     end
 
-    H1 -->|input| A1
-    A1 --> A2
-    A2 -->|conflicts?| A3
-    A3 --> A4
-    A4 -->|corrected schedule| H2
-    H2 -->|satisfied| H3
-    A4 -->|violations logged| H4
+    class H1,H2,H3 human
+    class A1,A2,A3,A4 ai
+    class T1,T2,T3 test
 
-    T1 -.->|validates| A1
-    T1 -.->|validates| A2
-    T2 -.->|validates| A1
-    T2 -.->|validates| A3
-    T3 -.->|validates| A4
-    T4 -.->|validates| H1 & H2 & H3
+    H1 --> A1 --> A2
+    A2 -->|Conflicts?| A3
+    A3 --> A4 --> H2
+    H2 --> H3
+
+    T1 -.->|Validates| A1 & A2
+    T2 -.->|Validates| A3
+    T3 -.->|Validates| A4

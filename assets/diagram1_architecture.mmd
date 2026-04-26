@@ -1,49 +1,60 @@
 graph TB
-    subgraph UI["UI Layer (Streamlit)"]
-        CHAT["Chat Assistant\n(NL input)"]
-        GANTT["Gantt Chart\n(schedule view)"]
-        SIDEBAR["Sidebar\n(pet / task admin)"]
+    %% ── CLASS DEFINITIONS ───────────────────────────────────────────────────
+    classDef ui        fill:#101B35,stroke:#1A2E55,color:#FFFFFF,font-weight:bold
+    classDef agent     fill:#FF6B35,stroke:#E8531E,color:#FFFFFF,font-weight:bold
+    classDef core      fill:#2EC4B6,stroke:#1EA89B,color:#FFFFFF
+    classDef data      fill:#F1F5F9,stroke:#CBD5E1,color:#101B35
+    classDef audit     fill:#F8FAFC,stroke:#E2E8F0,color:#64748B,font-style:italic
+
+    subgraph UI["🖥️ UI Layer (Streamlit)"]
+        CHAT["💬 Chat Assistant<br/>(NL input)"]
+        GANTT["📊 Gantt Chart<br/>(schedule view)"]
+        SIDEBAR["⚙️ Sidebar<br/>(Admin controls)"]
     end
 
-    subgraph AGENT["Agent Layer"]
-        ORCH["Orchestrator\n(coordinates all LLM calls)"]
-        PARSER["NL Parser\nClaude Haiku 4.5\n(text to structured task)"]
-        REACT["ReAct Loop\nClaude Sonnet 4.6\n(conflict resolution, up to 5 steps)"]
-        GUARD["Guardrail\n(post-loop validator)"]
-        TOOLS["Tool Registry\n(10 callable tools)"]
+    subgraph AGENT["🧠 Agent Layer"]
+        ORCH["⚙️ Orchestrator<br/>(coordinates workflow)"]
+        PARSER["🤖 NL Parser<br/>(Claude Haiku 4.5)"]
+        REACT["🔄 ReAct Loop<br/>(Claude Sonnet 4.6)"]
+        GUARD["⚖️ Evaluator<br/>(Safety validator)"]
+        TOOLS["🛠️ Tool Registry<br/>(9 callable tools)"]
     end
 
-    subgraph CORE["Core Scheduling Layer"]
-        SCHED["Scheduler\n(two-phase deterministic)"]
-        CONFLICT["Conflict Detector\n(sweep-line algorithm)"]
+    subgraph CORE["🛡️ Core Scheduling"]
+        RETRIEVER["🔍 Context Retriever<br/>(get_all_tasks)"]
+        SCHED["🗓️ Scheduler<br/>(2-phase logic)"]
+        CONFLICT["🔍 Conflict Detector<br/>(Sweep-line)"]
     end
 
-    subgraph DATA["Data Layer"]
+    subgraph DATA["💾 Data Layer"]
         OWNER["Owner"]
         PET["Pet"]
         TASK["Task"]
-        RESULT["ScheduleResult"]
     end
 
-    subgraph AUDIT["Audit & Observability"]
-        TRACE["TraceStep Log\n(Thought - Action - Observation)"]
-        JSONL["Guardrail JSONL\n(append-only violation log)"]
-        METRICS["RunMetrics\n(latency, token usage)"]
+    subgraph AUDIT["📈 Observability"]
+        TRACE["📜 Reasoning Trace<br/>(Audit trail)"]
+        METRICS["📊 RunMetrics<br/>(Tokens/Latency)"]
+        TESTER["🧪 Tester<br/>(Unit & Integration)"]
     end
 
-    CHAT -->|free-form text| ORCH
-    SIDEBAR -->|structured form data| ORCH
-    ORCH --> PARSER
-    ORCH --> REACT
-    ORCH --> GUARD
+    %% Apply Classes
+    class CHAT,GANTT,SIDEBAR ui
+    class ORCH,PARSER,REACT,GUARD,TOOLS agent
+    class RETRIEVER,SCHED,CONFLICT core
+    class OWNER,PET,TASK data
+    class TRACE,METRICS,TESTER audit
+
+    %% Flows
+    CHAT & SIDEBAR --> ORCH
+    ORCH --> PARSER & REACT & GUARD
     REACT --> TOOLS
-    TOOLS --> CONFLICT
-    TOOLS --> SCHED
+    ORCH --> RETRIEVER
+    RETRIEVER --> TOOLS
+    TOOLS --> SCHED & CONFLICT
     SCHED --> CONFLICT
-    SCHED --> RESULT
-    RESULT --> GANTT
-    GUARD --> JSONL
-    REACT --> TRACE
+    GANTT --- SCHED
+    GUARD --> TRACE
     ORCH --> METRICS
     OWNER --> PET --> TASK
-    SCHED --> OWNER
+    TESTER -.->|Validates| SCHED & CONFLICT

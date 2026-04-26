@@ -1,64 +1,67 @@
 flowchart TD
-    classDef input     fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f,font-weight:bold
-    classDef process   fill:#dcfce7,stroke:#16a34a,color:#14532d
-    classDef llm       fill:#fef9c3,stroke:#ca8a04,color:#713f12,font-weight:bold
-    classDef guardrail fill:#fee2e2,stroke:#dc2626,color:#7f1d1d,font-weight:bold
-    classDef output    fill:#f3e8ff,stroke:#9333ea,color:#581c87
-    classDef human     fill:#ffedd5,stroke:#ea580c,color:#7c2d12,font-weight:bold
-    classDef test      fill:#f1f5f9,stroke:#94a3b8,color:#334155
-    classDef decision  fill:#ffffff,stroke:#6b7280,color:#111827
+    %% ── CLASS DEFINITIONS ───────────────────────────────────────────────────
+    classDef input     fill:#101B35,stroke:#1A2E55,color:#FFFFFF,font-weight:bold
+    classDef process   fill:#2EC4B6,stroke:#1EA89B,color:#FFFFFF
+    classDef llm       fill:#FF6B35,stroke:#E8531E,color:#FFFFFF,font-weight:bold
+    classDef guardrail fill:#FEE2E2,stroke:#DC2626,color:#7F1D1D,font-weight:bold
+    classDef output    fill:#152B50,stroke:#101B35,color:#FFFFFF
+    classDef human     fill:#FB923C,stroke:#EA580C,color:#FFFFFF,font-weight:bold
+    classDef test      fill:#F1F5F9,stroke:#94A3B8,color:#334155
+    classDef decision  fill:#FFFFFF,stroke:#CBD5E1,color:#101B35
 
     %% ── INPUT LAYER ─────────────────────────────────────────────────────────
-    subgraph INPUT["Input Layer"]
-        NL(["Natural Language\nTask Description"]):::input
-        FORM(["Manual Form Input\nStreamlit Widgets"]):::input
+    subgraph INPUT["📥 Input Layer"]
+        direction LR
+        NL(["💬 Natural Language<br/>Task Description"]):::input
+        FORM(["📝 Manual Form Input<br/>Streamlit Widgets"]):::input
     end
 
     %% ── NL PARSING ──────────────────────────────────────────────────────────
-    PARSE["NL Parser\nclaude-haiku-4-5\nStructured tool-use call\nExtracts: name · duration · priority\nis_required · start_time · frequency · pet_name"]:::llm
-    CONF{"All fields\nextracted?"}:::decision
-    HC1(["Human Checkpoint 1\nClarification Prompt\nUser fills in missing fields"]):::human
+    PARSE["🤖 NL Parser<br/>(claude-haiku-4-5)<br/>Structured tool-use call<br/>Extracts task parameters"]:::llm
+    CONF{"All fields<br/>extracted?"}:::decision
+    HC1(["👤 Human Checkpoint 1<br/>Clarification Prompt"]):::human
 
     %% ── ORCHESTRATOR ─────────────────────────────────────────────────────────
-    ORCH["Orchestrator  —  orchestrator.py\nRoutes requests · manages ReAct loop\nCollects agent_trace[]"]:::process
+    ORCH["⚙️ Orchestrator<br/>(orchestrator.py)<br/>Routes requests & ReAct loop"]:::process
 
     %% ── DETERMINISTIC CORE ───────────────────────────────────────────────────
-    subgraph CORE["Deterministic Core  —  pawpal_system.py  +  tools.py"]
+    subgraph CORE["🛡️ Deterministic Core"]
         direction TB
-        TOOLS["Tools Layer  —  tools.py\nadd_task · reschedule_task · complete_task\nget_all_tasks · filter_tasks · save_state"]:::process
-        SCHED["Scheduler  —  generate_schedule\nPhase 1: Required tasks scheduled unconditionally\nPhase 2: Optional tasks by priority DESC, fit-first"]:::process
-        DETECT["Conflict Detector  —  detect_conflicts\nSweep-line algorithm on HH:MM windows\nFlags overlapping task pairs"]:::process
-        PERSIST[("Persistence\ndata/data.json\nload_from_json · save_to_json")]:::process
+        RETRIEVER["🔍 Context Retriever<br/>(get_all_tasks)"]:::process
+        TOOLS["🛠️ Tools Layer<br/>(tools.py)"]:::process
+        SCHED["🗓️ Scheduler<br/>(generate_schedule)"]:::process
+        DETECT["🔍 Conflict Detector<br/>(sweep-line algorithm)"]:::process
+        PERSIST[("💾 Persistence<br/>(data/data.json)")]:::process
     end
 
     %% ── LLM RESOLUTION LOOP ──────────────────────────────────────────────────
-    CDET{"Conflicts\ndetected?"}:::decision
+    CDET{"Conflicts<br/>detected?"}:::decision
 
-    subgraph RLOOP["LLM Resolution Loop  —  bounded by MAX_RESOLUTION_STEPS"]
-        REACT["ReAct Agent  —  claude-sonnet-4-6\nThought  →  Action  →  Observation\nCalls reschedule_task on each iteration"]:::llm
-        LEND{"Conflicts resolved\nor steps exhausted?"}:::decision
+    subgraph RLOOP["🔄 LLM Resolution Loop"]
+        REACT["🧠 ReAct Agent<br/>(claude-sonnet-4-6)<br/>Thought → Action → Observation"]:::llm
+        LEND{"Resolved or<br/>budget exhausted?"}:::decision
     end
 
-    HC2(["Human Checkpoint 2\nConflict Escalation\nManual override required"]):::human
+    HC2(["⚠️ Human Checkpoint 2<br/>Conflict Escalation"]):::human
 
     %% ── GUARDRAIL ────────────────────────────────────────────────────────────
-    subgraph GSUB["Guardrail  —  guardrail.py   [ NOT LLM-callable ]"]
-        GVAL["validate_required_tasks\nSynchronous · injection-proof\nCalled by orchestrator only — never by LLM"]:::guardrail
-        GCHECK{"Required tasks\nall present?"}:::decision
-        GREST["Auto-restore dropped required tasks\nEmits GUARDRAIL_VIOLATION event"]:::guardrail
+    subgraph GSUB["⚖️ Guardrail & Evaluation"]
+        GVAL["🛡️ Evaluator<br/>(validate_required_tasks)"]:::guardrail
+        GCHECK{"Required tasks<br/>all present?"}:::decision
+        GREST["♻️ Auto-restore<br/>Dropped required tasks"]:::guardrail
     end
 
     %% ── OUTPUT LAYER ─────────────────────────────────────────────────────────
-    subgraph OUT["Output Layer  —  app.py"]
-        UI["Streamlit UI\nSchedule table · Time-budget progress bar\nAgent Reasoning expander · Guardrail alert banner"]:::output
-        HC3(["Human Checkpoint 3\nSchedule Review + Mark Complete\nTriggers recurrence advance"]):::human
+    subgraph OUT["📱 Output Layer"]
+        UI["🖥️ Streamlit UI<br/>Gantt Chart & Agent Trace"]:::output
+        HC3(["✅ Human Checkpoint 3<br/>Review & Complete"]):::human
     end
 
     %% ── TESTING & OBSERVABILITY ──────────────────────────────────────────────
-    subgraph OBS["Testing & Observability"]
-        UNIT["Unit Tests  —  test_pawpal.py\n20 cases: sort · recurrence · conflict\ndetection · scheduler phases · edge cases"]:::test
-        GLOG["GUARDRAIL_VIOLATION Log\nTimestamped audit trail per session"]:::test
-        ATRACE["agent_trace[]\nStep-by-step ReAct log\nstored in st.session_state · rendered in UI"]:::test
+    subgraph OBS["📊 Observability & Testing"]
+        UNIT["🧪 Tester<br/>(Unit & Integration)"]:::test
+        GLOG["📜 Violation Log<br/>(Audit trail)"]:::test
+        ATRACE["📈 agent_trace[]<br/>Reasoning log"]:::test
     end
 
     %% ── DATA FLOW ────────────────────────────────────────────────────────────
@@ -66,37 +69,40 @@ flowchart TD
     FORM --> ORCH
 
     PARSE --> CONF
-    CONF -- "No — missing fields" --> HC1
-    HC1  -- "Retry with clarification" --> PARSE
-    CONF -- "Yes — TaskDict" --> ORCH
+    CONF -- "Missing fields" --> HC1
+    HC1  -- "Clarify" --> PARSE
+    CONF -- "Validated" --> ORCH
 
-    ORCH  --> TOOLS
+    ORCH  --> RETRIEVER
+    RETRIEVER --> TOOLS
     TOOLS --> SCHED
     SCHED --> DETECT
     DETECT --> CDET
 
-    CDET -- "No conflicts" --> GVAL
-    CDET -- "Conflicts found" --> REACT
+    CDET -- "Clean" --> GVAL
+    CDET -- "Conflicts" --> REACT
 
-    REACT -- "reschedule_task call" --> TOOLS
+    REACT -- "Tool Call" --> TOOLS
     REACT --> LEND
-    LEND -- "Conflicts resolved" --> GVAL
-    LEND -- "Continue loop" --> REACT
+    LEND -- "Resolved" --> GVAL
+    LEND -- "Next step" --> REACT
     LEND -- "Exhausted" --> HC2
 
     GVAL  --> GCHECK
-    GCHECK -- "All present" --> PERSIST
-    GCHECK -- "Violations found" --> GREST
+    GCHECK -- "Pass" --> PERSIST
+    GCHECK -- "Violation" --> GREST
     GREST --> GLOG
     GREST --> PERSIST
 
     PERSIST --> UI
     UI  --> HC3
-    HC3 -- "complete_task call" --> TOOLS
+    HC3 -- "Update" --> TOOLS
 
     ORCH   --> ATRACE
     ATRACE --> UI
 
     UNIT -.->|validates| SCHED
     UNIT -.->|validates| DETECT
-    GLOG -.->|audit trail| GSUB
+    GLOG -.->|audit| GSUB
+
+

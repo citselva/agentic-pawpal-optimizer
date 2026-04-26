@@ -1,125 +1,87 @@
 sequenceDiagram
-    actor User
-    participant UI as Streamlit UI<br/>(app.py)
-    participant Orch as Orchestrator<br/>(orchestrator.py)
-    participant LLM as LLM Agent<br/>(Claude API)
-    participant Tools as Tools<br/>(tools.py + pawpal_system.py)
-    participant Guard as Guardrail<br/>(guardrail.py)
+    actor User as 👤 Owner
+    participant UI as 🖥️ Streamlit UI<br/>(app.py)
+    participant Orch as ⚙️ Orchestrator<br/>(orchestrator.py)
+    participant LLM as 🧠 LLM Agent<br/>(Claude API)
+    participant Tools as 🛠️ Tools<br/>(tools.py)
+    participant Guard as ⚖️ Guardrail<br/>(guardrail.py)
 
     %%─────────────────────────────────────────────────────────────────
     %% PHASE 1 — Natural Language Input Parsing
     %%─────────────────────────────────────────────────────────────────
-    rect rgb(235, 245, 255)
-        Note over User,Guard: Phase 1 — Natural Language Input Parsing
+    rect rgb(240, 244, 255)
+        Note over User,Guard: Phase 1 — Natural Language Input Parsing (claude-haiku-4-5)
 
-        User->>UI: Natural-language task description<br/>"Buddy needs a 30-min walk every morning at 8 AM — required"
-        UI->>Orch: route_nl_input(raw_text)
-        Orch->>LLM: system_prompt [cache_control] + raw_text<br/>Model: claude-haiku-4-5
+        User->>UI: Natural-language task description<br/>"Buddy needs a 30-min walk at 8 AM"
+        UI->>Orch: parse_nl_task(raw_text)
+        Orch->>LLM: system_prompt [cached] + raw_text
 
-        Note right of LLM: Structured tool-use call — extracts:<br/>name · duration · priority · is_required<br/>start_time · frequency · pet_name
-
-        alt All fields extracted with confidence
-            LLM-->>Orch: tool_use → TaskDict (structured + validated)
+        alt Success
+            LLM-->>Orch: tool_use → add_task(TaskDict)
             Orch->>Tools: add_task(pet_name, TaskDict)
-            Tools-->>Orch: task appended to pet.tasks
-        else One or more fields ambiguous or missing
+            Tools-->>Orch: { success: true }
+        else Ambiguous Input
             LLM-->>UI: clarification_request(missing_fields[])
-            UI-->>User: Prompt for clarification
-            User->>UI: Provides missing details
-            UI->>Orch: route_nl_input(original + clarification)
-            Orch->>LLM: Retry with clarification context appended
-            LLM-->>Orch: tool_use → TaskDict (structured + validated)
-            Orch->>Tools: add_task(pet_name, TaskDict)
-            Tools-->>Orch: task appended to pet.tasks
+            UI-->>User: Prompt for missing details
+            User->>UI: Provides details
         end
     end
 
     %%─────────────────────────────────────────────────────────────────
     %% PHASE 2 — Deterministic Schedule Generation
     %%─────────────────────────────────────────────────────────────────
-    rect rgb(235, 255, 240)
+    rect rgb(230, 250, 245)
         Note over User,Guard: Phase 2 — Deterministic Schedule Generation
 
         Orch->>Tools: generate_schedule()
-
-        Note over Tools: Two-phase greedy algorithm:<br/>Phase 1 — Required tasks scheduled unconditionally<br/>(Time Deficit warning if over budget)<br/>Phase 2 — Optional tasks sorted by priority DESC,<br/>fit-first into remaining budget<br/>Preliminary sweep-line conflict scan appended to reasoning
-
-        Tools-->>Orch: ScheduleResult {<br/>  scheduled_tasks · skipped_tasks · total_time_used · reasoning<br/>}
+        Note over Tools: Phase 1: Required tasks (unconditional)<br/>Phase 2: Optional tasks (Priority DESC)
+        Tools-->>Orch: ScheduleResult + Conflict Warnings
     end
 
     %%─────────────────────────────────────────────────────────────────
     %% PHASE 3 — LLM Resolution Loop
     %%─────────────────────────────────────────────────────────────────
-    rect rgb(255, 252, 220)
-        Note over User,Guard: Phase 3 — LLM-Driven Resolution Loop (bounded by MAX_RESOLUTION_STEPS)
+    rect rgb(255, 245, 230)
+        Note over User,Guard: Phase 3 — LLM-Driven Resolution Loop (claude-sonnet-4-6)
 
-        Orch->>Tools: detect_conflicts(scheduled_tasks)
-        Tools-->>Orch: conflict_pairs[ {task_a, task_b} ]
+        Orch->>Tools: detect_conflicts()
+        Tools-->>Orch: conflict_pairs[]
 
-        alt No conflicts detected
-            Note over Orch: Schedule is clean — skip resolution loop
-        else One or more time-window overlaps detected
-            loop Resolution Loop [max 5 iterations by default]
-                Orch->>LLM: Thought prompt:<br/>conflict_pairs + current_schedule + hard_constraints<br/>Model: claude-sonnet-4-6
-
-                Note right of LLM: ReAct step — Reason:<br/>Which task to shift, by how much,<br/>and does the shift respect required-task windows?
-
-                LLM-->>Orch: Action: reschedule_task(pet_name, task_name, new_start_time)
-
-                Orch->>Tools: reschedule_task(pet_name, task_name, new_start_time)
-
-                Note over Tools: Mutates task.start_time only.<br/>duration · priority · is_required are read-only<br/>to the agent (FR-RL-06).
-
-                Tools-->>Orch: { success: true, updated_task: TaskDict }
-
-                Orch->>Tools: detect_conflicts(updated_schedule)
-                Tools-->>Orch: Observation: remaining_conflict_pairs[]
-
-                Note over Orch: Append step to agent_trace[]:<br/>{ thought · action · observation · iteration_n }
-            end
-
-            alt All conflicts resolved within step limit
-                Note over Orch: Loop exits cleanly — proceed to guardrail
-            else Step limit reached with conflicts remaining
-                Orch-->>UI: escalation_payload(unresolved_conflicts[], agent_trace[])
-                UI-->>User: Manual review required — conflicts could not be auto-resolved
-            end
+        loop Resolution Loop [max 5 steps]
+            Orch->>LLM: Thought prompt + conflicts
+            Note right of LLM: ReAct Protocol:<br/>Thought → Action → Observation
+            LLM-->>Orch: Action: reschedule_task()
+            Orch->>Tools: reschedule_task()
+            Tools-->>Orch: { success: true }
+            Orch->>Tools: detect_conflicts()
+            Tools-->>Orch: Observation: remaining_conflicts
         end
     end
 
     %%─────────────────────────────────────────────────────────────────
-    %% PHASE 4 — Guardrail Check (silent supervisor)
+    %% PHASE 4 — Guardrail Check
     %%─────────────────────────────────────────────────────────────────
-    rect rgb(255, 232, 232)
-        Note over User,Guard: Phase 4 — Guardrail Check (silent supervisor — NOT exposed to LLM)
+    rect rgb(255, 235, 235)
+        Note over User,Guard: Phase 4 — Guardrail Check (Safety Layer)
 
-        Orch->>Guard: validate_required_tasks(proposed_schedule, original_required_tasks[])
-
-        Note over Guard: Injection-proof: called by orchestrator only,<br/>never by the LLM.<br/>Runs synchronously in critical path (NFR-03).
-
-        Guard->>Tools: get_all_tasks() — filter is_required = true
-        Tools-->>Guard: authoritative required_task_list[]
-
-        alt All required tasks present in proposed_schedule
-            Guard-->>Orch: { violations: [], corrected_schedule: proposed_schedule }
-        else One or more required tasks dropped by LLM
-            Note over Guard: GUARDRAIL_VIOLATION event logged.<br/>Dropped required tasks auto-restored<br/>into corrected_schedule before returning.
-            Guard-->>Orch: { violations: [dropped_task_names[]], corrected_schedule: restored }
-            Orch-->>UI: guardrail_alert(violations[])
-            UI-->>User: Guardrail correction applied — required tasks restored automatically
+        Orch->>Guard: validate_required_tasks()
+        alt Violation Found
+            Note over Guard: Dropped required task detected
+            Guard->>Tools: restore_task()
+            Guard-->>Orch: { violations: [...], corrected: True }
+            Orch-->>UI: Show Guardrail Alert
+        else Clean
+            Guard-->>Orch: { violations: [], corrected: False }
         end
     end
 
     %%─────────────────────────────────────────────────────────────────
     %% PHASE 5 — Persist and Render
     %%─────────────────────────────────────────────────────────────────
-    rect rgb(245, 235, 255)
+    rect rgb(245, 240, 255)
         Note over User,Guard: Phase 5 — Persist and Render
 
-        Orch->>Tools: save_state() — data/data.json
-        Tools-->>Orch: persisted
-
-        Orch-->>UI: { final_schedule: ScheduleResult, agent_trace: step[], guardrail_violations: string[] }
-
-        UI-->>User: Schedule table · Time-budget progress bar<br/>Agent Reasoning expander (step-by-step trace)<br/>Guardrail alert if corrections were applied
+        Orch->>Tools: save_state()
+        Orch-->>UI: { final_schedule, agent_trace[] }
+        UI-->>User: Render Dashboard, Gantt Chart, and Reasoning Trace
     end

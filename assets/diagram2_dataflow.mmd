@@ -1,39 +1,50 @@
 flowchart LR
-    U(["Owner / User"])
+    %% ── CLASS DEFINITIONS ───────────────────────────────────────────────────
+    classDef user      fill:#FB923C,stroke:#EA580C,color:#FFFFFF,font-weight:bold
+    classDef input     fill:#101B35,stroke:#1A2E55,color:#FFFFFF
+    classDef logic     fill:#2EC4B6,stroke:#1EA89B,color:#FFFFFF
+    classDef agent     fill:#FF6B35,stroke:#E8531E,color:#FFFFFF
+    classDef output    fill:#152B50,stroke:#101B35,color:#FFFFFF
 
-    subgraph INPUT["Input"]
-        NL["Natural-language\ncare request"]
-        FORM["Structured form\n(pet name, duration,\npriority, due date)"]
+    U(["👤 Owner"])
+
+    subgraph INPUT["📥 Input"]
+        NL["💬 NL Request"]
+        FORM["📝 Structured Form"]
     end
 
-    subgraph PARSE["Parse & Validate"]
-        HAIKU["NL Parser\nHaiku 4.5\nextract Task fields"]
-        FILTER["Temporal Filter\ndue_date <= today\nand not completed"]
+    subgraph PARSE["⚙️ Parse & Filter"]
+        HAIKU["🤖 NL Parser"]
+        FILTER["🧹 Temporal Filter"]
+        RETR["🔍 Context Retriever"]
     end
 
-    subgraph SCHEDULE["Schedule"]
-        P1["Phase 1\nRequired tasks\n(sorted by priority)"]
-        P2["Phase 2\nOptional tasks\nShortest-Job-First"]
-        CD["Conflict Detector\noverlapping windows?"]
+    subgraph SCHEDULE["🛡️ Schedule"]
+        P1["Phase 1: Required"]
+        P2["Phase 2: Optional"]
+        CD["🔍 Conflict Detector"]
     end
 
-    subgraph RESOLVE["Resolve (if conflicts)"]
-        SONNET["ReAct Agent\nSonnet 4.6\nreschedule_task calls"]
-        GRD["Guardrail Check\nrestore dropped\nrequired tasks"]
+    subgraph RESOLVE["🧠 Resolve"]
+        SONNET["🔄 ReAct Agent"]
+        EVAL["⚖️ Evaluator"]
     end
 
-    subgraph OUTPUT["Output"]
-        GANT["Gantt Chart\nvisualization"]
-        SKIP["Skipped tasks\nlist (capacity)"]
-        LOG["Audit trail\n(reasoning trace\n+ violation log)"]
+    subgraph OUTPUT["📱 Output"]
+        GANT["📊 Gantt Chart"]
+        LOG["📜 Audit Log"]
     end
+
+    class U user
+    class NL,FORM input
+    class HAIKU,FILTER,RETR,P1,P2,CD logic
+    class SONNET,EVAL agent
+    class GANT,LOG output
 
     U --> NL & FORM
-    NL --> HAIKU --> FILTER
+    NL --> HAIKU --> RETR --> FILTER
     FORM --> FILTER
     FILTER --> P1 --> P2 --> CD
-    CD -->|"no conflicts"| GANT
-    CD -->|"conflicts found"| SONNET --> GRD --> GANT
-    GRD --> LOG
-    P2 --> SKIP
-    SONNET --> LOG
+    CD -->|"No Conflicts"| GANT
+    CD -->|"Conflicts Found"| SONNET --> EVAL --> GANT
+    EVAL & SONNET --> LOG
