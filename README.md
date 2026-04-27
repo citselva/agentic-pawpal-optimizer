@@ -670,7 +670,7 @@ To make the project presentation more accessible directly from this README, belo
     <img src="assets/presentation_cover.png" alt="PawPal+ Presentation Cover" width="600"/>
   </a>
   <br>
-  <em>Click the image to download the full .pptx file</em>
+  <em>Click the image to download the full presentation file</em>
 </p>
 
 > [!TIP]
@@ -692,7 +692,7 @@ To make the project presentation more accessible directly from this README, belo
 
 </details>
 
-- **📽️ Full Project Presentation:** [PawPal_Plus_Applied_AI_System.pptx](assets/PawPal_Plus_Applied_AI_System.pptx)
+- **📽️ Full Project Presentation:** [PawPal_Plus_Applied_AI_System.pdf](assets/PawPal_Plus_Applied_AI_System.pdf)
 - **🎬 Animated Demo (GIF):** [demo_walkthrough.gif](assets/demo_walkthrough.gif) — High-quality walkthrough for slides and presentations.
 - **🗺️ High-Fidelity Architecture:** [system_architecture.png](assets/system_architecture.png) — Integrated view of the agentic and deterministic layers.
 - **🔄 Agentic Workflow:** [agentic_workflow.png](assets/agentic_workflow.png) — Detailed visualization of the ReAct reasoning loop.
