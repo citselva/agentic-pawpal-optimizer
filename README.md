@@ -666,7 +666,7 @@ For a deep dive into the system design, architecture, and engineering decisions,
 To make the project presentation more accessible directly from this README, below is a slide-by-slide summary of the system overview deck.
 
 <p align="center">
-  <a href="assets/PawPal_Plus_Applied_AI_System.pptx">
+  <a href="assets/PawPal_Plus_Applied_AI_System.pdf">
     <img src="assets/presentation_cover.png" alt="PawPal+ Presentation Cover" width="600"/>
   </a>
   <br>
