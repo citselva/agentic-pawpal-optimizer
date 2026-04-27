@@ -661,7 +661,38 @@ MIT — free to use, extend, and build on.
 
 For a deep dive into the system design, architecture, and engineering decisions, please refer to the following supplemental documents:
 
-- **📽️ Full Project Presentation:** [PawPal_Plus_Applied_AI_System.pptx](assets/PawPal_Plus_Applied_AI_System.pptx) — Comprehensive overview of goals, architecture, and results.
+### 📽️ Presentation Slide Deck
+
+To make the project presentation more accessible directly from this README, below is a slide-by-slide summary of the system overview deck.
+
+<p align="center">
+  <a href="assets/PawPal_Plus_Applied_AI_System.pptx">
+    <img src="assets/presentation_cover.png" alt="PawPal+ Presentation Cover" width="600"/>
+  </a>
+  <br>
+  <em>Click the image to download the full .pptx file</em>
+</p>
+
+> [!TIP]
+> **Pro-Tip for GitHub Viewers:** For the best in-browser viewing experience, export the presentation as a **PDF** and link to it. GitHub will render the PDF directly in the browser!
+
+<details>
+<summary><b>📖 View Slide-by-Slide Summary</b></summary>
+
+| Slide | Title | Key Content / Takeaways |
+| :--- | :--- | :--- |
+| **1** | **PawPal+ — Applied AI System** | Introduction to the Agentic Pet Care Schedule Optimizer. |
+| **2** | **The Core Problem** | **Scheduling at Scale:** Conflicts in pet care require human-like reasoning. Deterministic logic alone isn't enough for "last mile" resolution. |
+| **3** | **Architecture Overview** | **Hybrid Design:** A deterministic scheduling core provides the foundation, while a Claude-powered ReAct loop handles complex conflict resolution. |
+| **4** | **ReAct Agent Loop** | **Thought → Action → Observation:** How the system iteratively reschedules tasks, detects remaining conflicts, and verifies safety. |
+| **5** | **Safety & Reliability** | **Structural Guardrails:** The injection-proof validator ensures required tasks are never dropped, with all violations logged to an audit trail. |
+| **6** | **The Two-Phase Algorithm** | **Phase 1:** Unconditional scheduling of required tasks. **Phase 2:** Priority-based (SJF) scheduling of optional tasks within the remaining budget. |
+| **7** | **Technical Stack** | Python 3.11, Streamlit, Anthropic (Claude 3.5/4.5), Pytest, and Mermaid for automated visualization. |
+| **8** | **Live Demo Recap** | Verification of the 5 core challenges: Scheduling, Persistence, Sort Keys, UI Alerts, and the Dual-Model Pipeline. |
+
+</details>
+
+- **📽️ Full Project Presentation:** [PawPal_Plus_Applied_AI_System.pptx](assets/PawPal_Plus_Applied_AI_System.pptx)
 - **🎬 Animated Demo (GIF):** [demo_walkthrough.gif](assets/demo_walkthrough.gif) — High-quality walkthrough for slides and presentations.
 - **🗺️ High-Fidelity Architecture:** [system_architecture.png](assets/system_architecture.png) — Integrated view of the agentic and deterministic layers.
 - **🔄 Agentic Workflow:** [agentic_workflow.png](assets/agentic_workflow.png) — Detailed visualization of the ReAct reasoning loop.
