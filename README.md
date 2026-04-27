@@ -616,30 +616,38 @@ Run: `pytest tests/ -v` — all 219 pass. See Section 7 for representative test 
 
 ```
 agentic-pawpal-optimizer/
-├── app.py                          # Streamlit dashboard (three-pane UI)
-├── main.py                         # CLI entry point (optional)
+├── app.py                          # Streamlit dashboard (Main Entry Point)
 ├── pawpal_system.py                # Core data models + deterministic scheduler
+├── main.py                         # Core logic demo & CLI test script
 ├── agent/
-│   ├── orchestrator.py             # ReAct loop, NL parsing, guardrail integration
-│   ├── tools.py                    # LLM tool layer (Tools 1–9) + guardrail (Tool 10)
-│   ├── guardrail.py                # Safety validation + JSONL audit logging
-│   └── prompts.py                  # System prompt templates + NL parse templates
+│   ├── orchestrator.py             # ReAct loop, NL parsing, & workflow coordination
+│   ├── tools.py                    # LLM tool layer (Tools 1–9)
+│   ├── guardrail.py                # Safety validation & JSONL audit logging
+│   └── prompts.py                  # System & NL parse prompt templates
 ├── assets/
-│   ├── demo_playback.webp          # Recorded playback video (WebP)
-│   ├── demo_step1_dashboard.png    # Walkthrough step 1
-│   ├── demo_step2_chat.png         # Walkthrough step 2
-│   ├── demo_step3_optimized.png    # Walkthrough step 3
-│   ├── system_architecture.png     # High-fidelity architectural diagram
-│   └── agentic_workflow.png        # Workflow visualization
+│   ├── demo_playback.webp          # Recorded application walkthrough (WebP)
+│   ├── demo_walkthrough.gif        # Animated walkthrough for presentations (GIF)
+│   ├── demo_step1_dashboard.png    # Dashboard walkthrough visual
+│   ├── demo_step2_chat.png         # Chat interaction walkthrough visual
+│   ├── demo_step3_optimized.png    # Optimization walkthrough visual
+│   ├── system_architecture.png     # High-fidelity system architecture diagram
+│   ├── agentic_workflow.png        # Visualization of the ReAct agentic workflow
+│   ├── diagram1_architecture.png   # Component architecture breakdown
+│   ├── diagram2_dataflow.png       # End-to-end data processing flow
+│   ├── diagram3_hitl.png           # Human-in-the-loop checkpoint map
+│   ├── system_diagrams.mmd         # Consolidated Mermaid source for all diagrams
+│   └── PawPal_Plus_Applied_AI_System.pptx # Project presentation deck
 ├── tests/
-│   ├── test_agent.py               # Orchestrator, tools, guardrail tests
-│   ├── test_e2e.py                 # End-to-end workflow + regression tests
-│   └── test_pawpal.py              # Scheduler and model unit tests
+│   ├── test_agent.py               # Orchestrator, tools, and guardrail tests
+│   ├── test_e2e.py                 # End-to-end workflow & UI regression tests
+│   └── test_pawpal.py              # Core scheduler and data model unit tests
 ├── data/
-│   ├── data.json                   # Persisted owner/pet/task graph
-│   └── guardrail_violations.jsonl  # Append-only guardrail audit trail
-├── requirements.txt
-└── README.md
+│   ├── data.json                   # Persisted owner/pet/task state
+│   └── guardrail_violations.jsonl  # Append-only safety violation audit trail
+├── requirements.txt                # Project dependencies
+├── model_card.md                   # Model selection, safety, & bias documentation
+├── REQUIREMENTS_EXTENSION.md       # Technical specification for the agentic layer
+└── README.md                       # Project documentation & walkthrough
 ```
 
 ---
@@ -654,6 +662,12 @@ MIT — free to use, extend, and build on.
 For a deep dive into the system design, architecture, and engineering decisions, please refer to the following supplemental documents:
 
 - **📽️ Full Project Presentation:** [PawPal_Plus_Applied_AI_System.pptx](assets/PawPal_Plus_Applied_AI_System.pptx) — Comprehensive overview of goals, architecture, and results.
-- **🗺️ System Architecture Diagram:** [system_architecture.png](assets/system_architecture.png) — High-fidelity visualization of the agentic and deterministic layers.
+- **🎬 Animated Demo (GIF):** [demo_walkthrough.gif](assets/demo_walkthrough.gif) — High-quality walkthrough for slides and presentations.
+- **🗺️ High-Fidelity Architecture:** [system_architecture.png](assets/system_architecture.png) — Integrated view of the agentic and deterministic layers.
+- **🔄 Agentic Workflow:** [agentic_workflow.png](assets/agentic_workflow.png) — Detailed visualization of the ReAct reasoning loop.
+- **🏗️ Component Architecture:** [diagram1_architecture.png](assets/diagram1_architecture.png) — Structural breakdown of system layers (Diagram 1).
+- **🌊 Data Flow Map:** [diagram2_dataflow.png](assets/diagram2_dataflow.png) — Sequential processing from input to output (Diagram 2).
+- **⚖️ Human-in-the-Loop Map:** [diagram3_hitl.png](assets/diagram3_hitl.png) — Control points and safety checkpoints (Diagram 3).
+- **🧬 Mermaid Source Code:** [system_diagrams.mmd](assets/system_diagrams.mmd) — Raw Mermaid diagrams for all project visualizations.
 - **📄 Model Card:** [model_card.md](model_card.md) — Detailed accounting of model selection, limitations, biases, and safety assessment.
 - **📝 Technical Specification:** [REQUIREMENTS_EXTENSION.md](REQUIREMENTS_EXTENSION.md) — The original engineering requirements and tool schemas for the agentic extension.
