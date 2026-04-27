@@ -650,13 +650,6 @@ agentic-pawpal-optimizer/
 └── README.md                       # Project documentation & walkthrough
 ```
 
----
-
-## License
-
-MIT — free to use, extend, and build on.
----
-
 ## 9. Project Resources
 
 For a deep dive into the system design, architecture, and engineering decisions, please refer to the following supplemental documents:
@@ -702,3 +695,10 @@ To make the project presentation more accessible directly from this README, belo
 - **🧬 Mermaid Source Code:** [system_diagrams.md](assets/system_diagrams.md) — Raw Mermaid diagrams for all project visualizations.
 - **📄 Model Card:** [model_card.md](model_card.md) — Detailed accounting of model selection, limitations, biases, and safety assessment.
 - **📝 Technical Specification:** [REQUIREMENTS_EXTENSION.md](REQUIREMENTS_EXTENSION.md) — The original engineering requirements and tool schemas for the agentic extension.
+
+---
+
+## License
+
+MIT — free to use, extend, and build on.
+---
