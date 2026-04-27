@@ -699,6 +699,6 @@ To make the project presentation more accessible directly from this README, belo
 - **🏗️ Component Architecture:** [diagram1_architecture.png](assets/diagram1_architecture.png) — Structural breakdown of system layers (Diagram 1).
 - **🌊 Data Flow Map:** [diagram2_dataflow.png](assets/diagram2_dataflow.png) — Sequential processing from input to output (Diagram 2).
 - **⚖️ Human-in-the-Loop Map:** [diagram3_hitl.png](assets/diagram3_hitl.png) — Control points and safety checkpoints (Diagram 3).
-- **🧬 Mermaid Source Code:** [system_diagrams.mmd](assets/system_diagrams.mmd) — Raw Mermaid diagrams for all project visualizations.
+- **🧬 Mermaid Source Code:** [system_diagrams.md](assets/system_diagrams.md) — Raw Mermaid diagrams for all project visualizations.
 - **📄 Model Card:** [model_card.md](model_card.md) — Detailed accounting of model selection, limitations, biases, and safety assessment.
 - **📝 Technical Specification:** [REQUIREMENTS_EXTENSION.md](REQUIREMENTS_EXTENSION.md) — The original engineering requirements and tool schemas for the agentic extension.

@@ -1,7 +1,9 @@
-%% ============================================================
-%% Diagram 1 — System Architecture Overview
-%% ============================================================
+# PawPal+ System Diagrams
 
+This document contains the raw Mermaid source code for all project visualizations.
+
+## 1. System Architecture Overview
+```mermaid
 graph TB
     %% ── CLASS DEFINITIONS ───────────────────────────────────────────────────
     classDef ui        fill:#101B35,stroke:#1A2E55,color:#FFFFFF,font-weight:bold
@@ -62,14 +64,12 @@ graph TB
     ORCH --> METRICS
     OWNER --> PET --> TASK
     TESTER -.->|Validates| SCHED & CONFLICT
-
-
-%% ============================================================
-%% Diagram 2 — Data Flow (Input → Process → Output)
-%% ============================================================
+```
 
 ---
 
+## 2. Data Flow (Input → Process → Output)
+```mermaid
 flowchart LR
     %% ── CLASS DEFINITIONS ───────────────────────────────────────────────────
     classDef user      fill:#FB923C,stroke:#EA580C,color:#FFFFFF,font-weight:bold
@@ -120,14 +120,12 @@ flowchart LR
     CD -->|"No Conflicts"| GANT
     CD -->|"Conflicts Found"| SONNET --> EVAL --> GANT
     EVAL & SONNET --> LOG
-
-
-%% ============================================================
-%% Diagram 3 — Human-in-the-Loop & Testing Checkpoints
-%% ============================================================
+```
 
 ---
 
+## 3. Human-in-the-Loop & Testing Checkpoints
+```mermaid
 flowchart TB
     %% ── CLASS DEFINITIONS ───────────────────────────────────────────────────
     classDef human     fill:#FB923C,stroke:#EA580C,color:#FFFFFF,font-weight:bold
@@ -167,3 +165,4 @@ flowchart TB
     T1 -.->|Validates| A1 & A2
     T2 -.->|Validates| A3
     T3 -.->|Validates| A4
+```
