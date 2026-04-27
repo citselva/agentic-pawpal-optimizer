@@ -681,14 +681,14 @@ To make the project presentation more accessible directly from this README, belo
 
 | Slide | Title | Key Content / Takeaways |
 | :--- | :--- | :--- |
-| **1** | **PawPal+ — Applied AI System** | Introduction to the Agentic Pet Care Schedule Optimizer. |
-| **2** | **The Core Problem** | **Scheduling at Scale:** Conflicts in pet care require human-like reasoning. Deterministic logic alone isn't enough for "last mile" resolution. |
-| **3** | **Architecture Overview** | **Hybrid Design:** A deterministic scheduling core provides the foundation, while a Claude-powered ReAct loop handles complex conflict resolution. |
-| **4** | **ReAct Agent Loop** | **Thought → Action → Observation:** How the system iteratively reschedules tasks, detects remaining conflicts, and verifies safety. |
-| **5** | **Safety & Reliability** | **Structural Guardrails:** The injection-proof validator ensures required tasks are never dropped, with all violations logged to an audit trail. |
-| **6** | **The Two-Phase Algorithm** | **Phase 1:** Unconditional scheduling of required tasks. **Phase 2:** Priority-based (SJF) scheduling of optional tasks within the remaining budget. |
-| **7** | **Technical Stack** | Python 3.11, Streamlit, Anthropic (Claude 3.5/4.5), Pytest, and Mermaid for automated visualization. |
-| **8** | **Live Demo Recap** | Verification of the 5 core challenges: Scheduling, Persistence, Sort Keys, UI Alerts, and the Dual-Model Pipeline. |
+| **1** | **PawPal+ — Applied AI System** | Introduction to the Agentic Pet Care Schedule Optimizer. Evolution from PawPal starter project to a full multi-agent system. |
+| **2** | **The Problem** | **From Starter App to Agentic System:** Comparison of deterministic limitations vs. the new agentic capabilities (NL parsing, ReAct resolution, audit trails). |
+| **3** | **The Logic** | **Five-Phase Agentic Workflow:** Sequential flow from NL Parsing and Deterministic Scheduling to ReAct Resolution, Safety Guardrails, and Persistence. |
+| **4** | **The Architecture** | **Hybrid Tool-Use:** Nine LLM-callable tools plus a structural, injection-proof safety guardrail (Tool 10). Includes prompt caching and deterministic baselines. |
+| **5** | **Reliability** | **Proving correctness at scale:** 219 automated tests (0 failures) covering tools, E2E workflows, and the core scheduler. Key mention of the `same_name` safety bug. |
+| **6** | **The Reflection** | **What Surprised Us:** Lessons learned from the guardrail’s precision, the audit log’s behavioral insights, and the `-webkit-text-fill-color` browser rendering bug. |
+| **7** | **AI Collaboration** | **Strategic Anchor vs Force Multiplier:** Analysis of the best AI-driven architectural suggestions vs. the browser-level rendering misses. |
+| **8** | **Live Demo & Q&A** | Verification of the 5 demo checkpoints: NL entry, ReAct loop, safety triggers, performance reports, and architectural deep-dive. |
 
 </details>
 
